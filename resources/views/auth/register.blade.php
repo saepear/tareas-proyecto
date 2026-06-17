@@ -42,9 +42,9 @@
                 @csrf
                 
                 <div class="form-group">
-                    <div class="input-group neu-input @error('nombre') invalid-input @enderror">
-                        <input type="text" id="nombre" name="nombre" value="{{ old('nombre') }}" required placeholder=" ">
-                        <label for="nombre">Nombre</label>
+                    <div class="input-group neu-input @error('first_name') invalid-input @enderror">
+                        <input type="text" id="first_name" name="first_name" value="{{ old('first_name') }}" required placeholder=" ">
+                        <label for="first_name">First Name</label>
                         <div class="input-icon">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
@@ -52,15 +52,15 @@
                             </svg>
                         </div>
                     </div>
-                    @error('nombre')
+                    @error('first_name')
                         <span class="error-message">{{ $message }}</span>
                     @enderror
                 </div>
 
                 <div class="form-group">
-                    <div class="input-group neu-input @error('apellido') invalid-input @enderror">
-                        <input type="text" id="apellido" name="apellido" value="{{ old('apellido') }}" required placeholder=" ">
-                        <label for="apellido">Apellido</label>
+                    <div class="input-group neu-input @error('last_name') invalid-input @enderror">
+                        <input type="text" id="last_name" name="last_name" value="{{ old('last_name') }}" required placeholder=" ">
+                        <label for="last_name">Last Name</label>
                         <div class="input-icon">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
@@ -68,7 +68,7 @@
                             </svg>
                         </div>
                     </div>
-                    @error('apellido')
+                    @error('last_name')
                         <span class="error-message">{{ $message }}</span>
                     @enderror
                 </div>
