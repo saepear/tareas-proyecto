@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', function () {
     initSettings();
     animateSidebar();
     animatePageTitle();
+    preventSamePageNav();
 
     function initSettings() {
         initAvatar();
@@ -205,27 +206,25 @@ document.addEventListener('DOMContentLoaded', function () {
         sessionStorage.setItem('sidebar_animated', '1');
 
         gsap.from('.sidebar', {
-            scale: 0.85,
-            opacity: 0,
-            duration: 0.7,
-            ease: 'power3.out',
+            scale: 0.98,
+            duration: 0.4,
+            ease: 'power2.out',
             transformOrigin: 'center center'
         });
 
         gsap.from('.nav-item', {
-            y: -12,
-            opacity: 0,
-            duration: 0.4,
-            stagger: 0.06,
+            y: -8,
+            duration: 0.3,
+            stagger: 0.04,
             ease: 'power2.out',
-            delay: 0.3
+            delay: 0.15
         });
 
         gsap.from('.user-info', {
             opacity: 0,
-            y: 12,
-            duration: 0.4,
-            delay: 0.6
+            y: 8,
+            duration: 0.3,
+            delay: 0.3
         });
     }
 
@@ -347,4 +346,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (chevron) chevron.classList.toggle('open');
     };
+
+    function preventSamePageNav() {
+        document.querySelectorAll('.nav-sub-item').forEach(function (el) {
+            el.addEventListener('click', function (e) {
+                if (this.getAttribute('href') === window.location.pathname + window.location.search) {
+                    e.preventDefault();
+                }
+            });
+        });
+    }
 });

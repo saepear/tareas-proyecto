@@ -75,7 +75,7 @@ body {
     font-weight: 500;
     font-size: 15px;
     transition: all 0.3s ease;
-    background: var(--bg);
+    background: var(--card-bg);
     border: 1px solid var(--border);
     cursor: pointer;
     width: 100%;
@@ -100,7 +100,6 @@ body {
 }
 
 .nav-item-dashboard {
-    border: 2px solid var(--info);
     font-weight: 700;
 }
 
@@ -888,6 +887,7 @@ dialog.neu-modal::backdrop {
     text-align: left;
     font-size: 14px;
     font-weight: 500;
+    text-decoration: none;
     transition: all 0.3s ease;
     font-family: inherit;
 }
