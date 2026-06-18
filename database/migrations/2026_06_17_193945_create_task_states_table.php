@@ -11,9 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('status_task', function (Blueprint $table) {
+        Schema::create('task_states', function (Blueprint $table) {
             $table->id();
+            $tabla->string('name')->unique();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
@@ -22,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('status_task');
+        Schema::dropIfExists('task_states');
     }
 };
