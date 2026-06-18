@@ -6,13 +6,15 @@
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: #e0e5ec;
+    background: var(--bg);
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 20px;
     line-height: 1.6;
+    color: var(--text-primary);
+    transition: background 0.3s ease, color 0.3s ease;
 }
 
 .login-container {
@@ -21,12 +23,12 @@ body {
 }
 
 .login-card {
-    background: #e0e5ec;
+    background: var(--card-bg);
     border-radius: 30px;
     padding: 50px 40px;
     box-shadow:
-        20px 20px 60px #bec3cf,
-        -20px -20px 60px #ffffff;
+        20px 20px 60px var(--shadow-dark),
+        -20px -20px 60px var(--shadow-light);
     position: relative;
     transition: all 0.3s ease;
 }
@@ -44,25 +46,25 @@ body {
     width: 80px;
     height: 80px;
     margin: 0 auto 24px;
-    background: #e0e5ec;
+    background: var(--bg);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     box-shadow:
-        8px 8px 20px #bec3cf,
-        -8px -8px 20px #ffffff,
-        inset 0 0 0 #bec3cf,
-        inset 0 0 0 #ffffff;
+        8px 8px 20px var(--shadow-dark),
+        -8px -8px 20px var(--shadow-light),
+        inset 0 0 0 var(--shadow-dark),
+        inset 0 0 0 var(--shadow-light);
     transition: all 0.3s ease;
 }
 
 .neu-icon:hover {
     box-shadow:
-        4px 4px 10px #bec3cf,
-        -4px -4px 10px #ffffff,
-        inset 4px 4px 10px #bec3cf,
-        inset -4px -4px 10px #ffffff;
+        4px 4px 10px var(--shadow-dark),
+        -4px -4px 10px var(--shadow-light),
+        inset 4px 4px 10px var(--shadow-dark),
+        inset -4px -4px 10px var(--shadow-light);
 }
 
 .icon-inner {
@@ -71,7 +73,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #6c7293;
+    color: var(--text-secondary);
 }
 
 .icon-inner svg {
@@ -80,14 +82,14 @@ body {
 }
 
 .login-header h2 {
-    color: #3d4468;
+    color: var(--text-primary);
     font-size: 2rem;
     font-weight: 600;
     margin-bottom: 8px;
 }
 
 .login-header p {
-    color: #9499b7;
+    color: var(--text-muted);
     font-size: 15px;
     font-weight: 400;
 }
@@ -99,18 +101,18 @@ body {
 
 .neu-input {
     position: relative;
-    background: #e0e5ec;
+    background: var(--bg);
     border-radius: 15px;
     box-shadow:
-        inset 8px 8px 16px #bec3cf,
-        inset -8px -8px 16px #ffffff;
+        inset 8px 8px 16px var(--shadow-dark),
+        inset -8px -8px 16px var(--shadow-light);
     transition: all 0.3s ease;
 }
 
 .neu-input:focus-within {
     box-shadow:
-        inset 4px 4px 8px #bec3cf,
-        inset -4px -4px 8px #ffffff;
+        inset 4px 4px 8px var(--shadow-dark),
+        inset -4px -4px 8px var(--shadow-light);
 }
 
 .neu-input input {
@@ -119,7 +121,7 @@ body {
     border: none;
     padding: 20px 24px;
     padding-left: 55px;
-    color: #3d4468;
+    color: var(--text-primary);
     font-size: 16px;
     font-weight: 500;
     outline: none;
@@ -135,7 +137,7 @@ body {
     left: 55px;
     top: 50%;
     transform: translateY(-50%);
-    color: #9499b7;
+    color: var(--text-muted);
     font-size: 16px;
     font-weight: 400;
     pointer-events: none;
@@ -146,7 +148,7 @@ body {
 .neu-input input:not(:placeholder-shown)+label {
     top: 8px;
     font-size: 12px;
-    color: #6c7293;
+    color: var(--text-secondary);
     transform: translateY(0);
 }
 
@@ -157,7 +159,7 @@ body {
     transform: translateY(-50%);
     width: 20px;
     height: 20px;
-    color: #9499b7;
+    color: var(--text-muted);
     transition: all 0.3s ease;
 }
 
@@ -167,10 +169,9 @@ body {
 }
 
 .neu-input:focus-within .input-icon {
-    color: #6c7293;
+    color: var(--text-secondary);
 }
 
-/* Contraseña Toggle */
 .password-group {
     padding-right: 50px;
 }
@@ -180,7 +181,7 @@ body {
     right: 15px;
     top: 50%;
     transform: translateY(-50%);
-    background: #e0e5ec;
+    background: var(--bg);
     border: none;
     width: 35px;
     height: 35px;
@@ -189,21 +190,21 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #9499b7;
+    color: var(--text-muted);
     box-shadow:
-        4px 4px 10px #bec3cf,
-        -4px -4px 10px #ffffff;
+        4px 4px 10px var(--shadow-dark),
+        -4px -4px 10px var(--shadow-light);
     transition: all 0.3s ease;
 }
 
 .neu-toggle:hover {
-    color: #6c7293;
+    color: var(--text-secondary);
 }
 
 .neu-toggle:active {
     box-shadow:
-        inset 2px 2px 5px #bec3cf,
-        inset -2px -2px 5px #ffffff;
+        inset 2px 2px 5px var(--shadow-dark),
+        inset -2px -2px 5px var(--shadow-light);
 }
 
 .neu-toggle svg {
@@ -223,7 +224,6 @@ body {
     display: block;
 }
 
-/* Opciones de formulario */
 .form-options {
     display: flex;
     justify-content: space-between;
@@ -249,7 +249,7 @@ body {
     gap: 12px;
     cursor: pointer;
     user-select: none;
-    color: #6c7293;
+    color: var(--text-secondary);
     font-size: 14px;
     font-weight: 500;
 }
@@ -257,14 +257,14 @@ body {
 .neu-checkbox {
     width: 22px;
     height: 22px;
-    background: #e0e5ec;
+    background: var(--bg);
     border-radius: 6px;
     display: flex;
     align-items: center;
     justify-content: center;
     box-shadow:
-        3px 3px 8px #bec3cf,
-        -3px -3px 8px #ffffff;
+        3px 3px 8px var(--shadow-dark),
+        -3px -3px 8px var(--shadow-light);
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
@@ -272,14 +272,14 @@ body {
 
 .remember-wrapper input[type="checkbox"]:checked+.checkbox-label .neu-checkbox {
     box-shadow:
-        inset 2px 2px 5px #bec3cf,
-        inset -2px -2px 5px #ffffff;
+        inset 2px 2px 5px var(--shadow-dark),
+        inset -2px -2px 5px var(--shadow-light);
 }
 
 .neu-checkbox svg {
     width: 14px;
     height: 14px;
-    color: #00c896;
+    color: var(--success);
     opacity: 0;
     transform: scale(0);
     transition: all 0.3s ease;
@@ -291,7 +291,7 @@ body {
 }
 
 .forgot-link {
-    color: #6c7293;
+    color: var(--text-secondary);
     text-decoration: none;
     font-size: 14px;
     font-weight: 500;
@@ -299,25 +299,24 @@ body {
 }
 
 .forgot-link:hover {
-    color: #3d4468;
+    color: var(--text-primary);
 }
 
-/* Boton Neumorfico */
 .neu-button {
     width: 100%;
-    background: #e0e5ec;
+    background: var(--bg);
     border: none;
     border-radius: 15px;
     padding: 18px 32px;
-    color: #3d4468;
+    color: var(--text-primary);
     font-size: 16px;
     font-weight: 600;
     cursor: pointer;
     position: relative;
     margin-bottom: 30px;
     box-shadow:
-        8px 8px 20px #bec3cf,
-        -8px -8px 20px #ffffff;
+        8px 8px 20px var(--shadow-dark),
+        -8px -8px 20px var(--shadow-light);
     transition: all 0.3s ease;
     overflow: hidden;
 }
@@ -336,8 +335,8 @@ body {
 .neu-button:hover {
     transform: translateY(-2px);
     box-shadow:
-        12px 12px 30px #bec3cf,
-        -12px -12px 30px #ffffff;
+        12px 12px 30px var(--shadow-dark),
+        -12px -12px 30px var(--shadow-light);
 }
 
 .neu-button:hover::before {
@@ -347,8 +346,8 @@ body {
 .neu-button:active {
     transform: translateY(0);
     box-shadow:
-        inset 4px 4px 10px #bec3cf,
-        inset -4px -4px 10px #ffffff;
+        inset 4px 4px 10px var(--shadow-dark),
+        inset -4px -4px 10px var(--shadow-light);
 }
 
 .btn-text {
@@ -369,8 +368,8 @@ body {
 .neu-spinner {
     width: 20px;
     height: 20px;
-    border: 3px solid #bec3cf;
-    border-top: 3px solid #6c7293;
+    border: 3px solid var(--shadow-dark);
+    border-top: 3px solid var(--text-secondary);
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
@@ -393,7 +392,6 @@ body {
     opacity: 1;
 }
 
-/* Divisor */
 .divider {
     display: flex;
     align-items: center;
@@ -404,18 +402,17 @@ body {
 .divider-line {
     flex: 1;
     height: 2px;
-    background: linear-gradient(90deg, transparent, #bec3cf, transparent);
+    background: linear-gradient(90deg, transparent, var(--shadow-dark), transparent);
 }
 
 .divider span {
-    color: #9499b7;
+    color: var(--text-muted);
     font-size: 13px;
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 1px;
 }
 
-/* Login Social */
 .social-login {
     display: flex;
     justify-content: center;
@@ -426,32 +423,32 @@ body {
 .neu-social {
     width: 50px;
     height: 50px;
-    background: #e0e5ec;
+    background: var(--bg);
     border: none;
     border-radius: 15px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #6c7293;
+    color: var(--text-secondary);
     box-shadow:
-        6px 6px 15px #bec3cf,
-        -6px -6px 15px #ffffff;
+        6px 6px 15px var(--shadow-dark),
+        -6px -6px 15px var(--shadow-light);
     transition: all 0.3s ease;
 }
 
 .neu-social:hover {
     transform: translateY(-2px);
     box-shadow:
-        8px 8px 20px #bec3cf,
-        -8px -8px 20px #ffffff;
+        8px 8px 20px var(--shadow-dark),
+        -8px -8px 20px var(--shadow-light);
 }
 
 .neu-social:active {
     transform: translateY(0);
     box-shadow:
-        inset 3px 3px 8px #bec3cf,
-        inset -3px -3px 8px #ffffff;
+        inset 3px 3px 8px var(--shadow-dark),
+        inset -3px -3px 8px var(--shadow-light);
 }
 
 .neu-social svg {
@@ -459,30 +456,28 @@ body {
     height: 22px;
 }
 
-/* Enlace de registro */
 .signup-link {
     text-align: center;
 }
 
 .signup-link p {
-    color: #9499b7;
+    color: var(--text-muted);
     font-size: 14px;
 }
 
 .signup-link a {
-    color: #6c7293;
+    color: var(--text-secondary);
     text-decoration: none;
     font-weight: 600;
     transition: color 0.3s ease;
 }
 
 .signup-link a:hover {
-    color: #3d4468;
+    color: var(--text-primary);
 }
 
-/* Estados de error */
 .error-message {
-    color: #ff3b5c;
+    color: var(--danger);
     font-size: 12px;
     font-weight: 500;
     margin-top: 8px;
@@ -499,12 +494,11 @@ body {
 
 .form-group.error .neu-input {
     box-shadow:
-        inset 8px 8px 16px #ffb8c4,
-        inset -8px -8px 16px #ffffff,
-        0 0 0 2px #ff3b5c;
+        inset 8px 8px 16px var(--shadow-danger),
+        inset -8px -8px 16px var(--shadow-light),
+        0 0 0 2px var(--danger);
 }
 
-/* Mensaje de éxito */
 .success-message {
     display: none;
     text-align: center;
@@ -521,23 +515,22 @@ body {
 }
 
 .success-message .neu-icon {
-    background: #e0e5ec;
-    color: #00c896;
+    background: var(--bg);
+    color: var(--success);
     margin-bottom: 20px;
 }
 
 .success-message h3 {
-    color: #3d4468;
+    color: var(--text-primary);
     font-size: 1.5rem;
     margin-bottom: 8px;
 }
 
 .success-message p {
-    color: #9499b7;
+    color: var(--text-muted);
     font-size: 14px;
 }
 
-/* Responsive para móviles */
 @media (max-width: 480px) {
     body {
         padding: 16px;

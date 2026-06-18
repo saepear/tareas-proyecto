@@ -4,10 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro - Task Manager</title>
+    <link rel="icon" href="{{ asset('images/logo.png') }}">
+    <script>(function(){var t=localStorage.getItem('theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.classList.add('dark');})();</script>
+    <link rel="stylesheet" href="{{ asset('css/theme.css') }}">
     <link rel="stylesheet" href="{{ asset('css/login.css') }}">
     <style>
         .error-message {
-            color: #ff3b5c;
+            color: var(--danger);
             font-size: 13px;
             font-weight: 500;
             margin-top: 8px;
@@ -16,9 +19,34 @@
         }
         .invalid-input {
             box-shadow: 
-                inset 8px 8px 16px #ffb8c4,
-                inset -8px -8px 16px #ffffff,
-                0 0 0 2px #ff3b5c !important;
+                inset 8px 8px 16px var(--shadow-danger),
+                inset -8px -8px 16px var(--shadow-light),
+                0 0 0 2px var(--danger) !important;
+        }
+        .theme-toggle-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 999;
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: var(--bg);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            box-shadow: 4px 4px 10px var(--shadow-dark), -4px -4px 10px var(--shadow-light);
+            transition: all 0.3s ease;
+        }
+        .theme-toggle-btn:hover {
+            color: var(--text-primary);
+            box-shadow: 6px 6px 14px var(--shadow-dark), -6px -6px 14px var(--shadow-light);
+        }
+        .theme-toggle-btn:active {
+            box-shadow: inset 2px 2px 5px var(--shadow-dark), inset -2px -2px 5px var(--shadow-light);
         }
     </style>
 </head>
@@ -28,10 +56,7 @@
             <div class="login-header">
                 <div class="neu-icon">
                     <div class="icon-inner">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                            <circle cx="12" cy="7" r="4"/>
-                        </svg>
+                        <img src="{{ asset('images/logo.png') }}" alt="Logo" style="width:100%;height:100%;object-fit:contain;border-radius:50%;">
                     </div>
                 </div>
                 <h2>Crear Cuenta</h2>
@@ -150,7 +175,23 @@
         </div>
     </div>
 
+    <button class="theme-toggle-btn" onclick="toggleTheme(document.body.classList.contains('dark') ? 'light' : 'dark')">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px">
+            <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;display:none">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+    </button>
+
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
+    <script src="{{ asset('js/theme.js') }}"></script>
     <script>
+        initTheme();
+
         // Password fields toggles
         const setupToggle = (toggleBtnId, inputId, eyeOpenCls, eyeClosedCls) => {
             const toggleBtn = document.querySelector(toggleBtnId);
