@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class SettingsController extends Controller
@@ -11,8 +12,8 @@ class SettingsController extends Controller
         $request->validate([
             'display_name' => ['nullable', 'string', 'max:255'],
         ]);
-
-        $user = auth()->user();
+        
+        $user = $request->user();
         $user->display_name = $request->display_name;
         $user->save();
 

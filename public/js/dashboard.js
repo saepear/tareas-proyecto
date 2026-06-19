@@ -1,3 +1,30 @@
+function animateSidebar() {
+    if (sessionStorage.getItem('sidebar_animated')) return;
+    sessionStorage.setItem('sidebar_animated', '1');
+
+    gsap.from('.sidebar', {
+        scale: 0.98,
+        duration: 0.4,
+        ease: 'power2.out',
+        transformOrigin: 'center center'
+    });
+
+    gsap.from('.nav-item', {
+        y: -8,
+        duration: 0.3,
+        stagger: 0.04,
+        ease: 'power2.out',
+        delay: 0.15
+    });
+
+    gsap.from('.user-info', {
+        opacity: 0,
+        y: 8,
+        duration: 0.3,
+        delay: 0.3
+    });
+}
+
 document.addEventListener('DOMContentLoaded', function () {
 
     gsap.registerPlugin(Flip, CustomEase, SplitText);
@@ -6,6 +33,10 @@ document.addEventListener('DOMContentLoaded', function () {
     animateSidebar();
     animatePageTitle();
     preventSamePageNav();
+
+    if (document.querySelector('.stat-card')) {
+        animateStats();
+    }
 
     function initSettings() {
         initAvatar();
@@ -43,9 +74,9 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function initAvatarTransform() {
-        var zoom = localStorage.getItem('avatar_zoom');
-        var x = localStorage.getItem('avatar_x');
-        var y = localStorage.getItem('avatar_y');
+        const zoom = localStorage.getItem('avatar_zoom');
+        const x = localStorage.getItem('avatar_x');
+        const y = localStorage.getItem('avatar_y');
         if (zoom || x || y) {
             applyAvatarTransform(zoom || 100, x || 0, y || 0);
             if (document.getElementById('avatar-zoom')) document.getElementById('avatar-zoom').value = zoom || 100;
@@ -56,7 +87,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function applyAvatarTransform(zoom, x, y) {
-        var val = 'scale(' + (zoom / 100) + ') translate(' + x + 'px, ' + y + 'px)';
+        const val = 'scale(' + (zoom / 100) + ') translate(' + x + 'px, ' + y + 'px)';
         document.querySelectorAll('.user-avatar img').forEach(function (img) {
             img.style.transform = val;
         });
@@ -66,15 +97,15 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function setupAvatarControls() {
-        var zoomInput = document.getElementById('avatar-zoom');
-        var xInput = document.getElementById('avatar-x');
-        var yInput = document.getElementById('avatar-y');
+        const zoomInput = document.getElementById('avatar-zoom');
+        const xInput = document.getElementById('avatar-x');
+        const yInput = document.getElementById('avatar-y');
         if (!zoomInput) return;
 
         function update() {
-            var z = parseInt(zoomInput.value);
-            var x = parseInt(xInput.value);
-            var y = parseInt(yInput.value);
+            const z = Number.parseInt(zoomInput.value, 10);
+            const x = Number.parseInt(xInput.value, 10);
+            const y = Number.parseInt(yInput.value, 10);
             localStorage.setItem('avatar_zoom', z);
             localStorage.setItem('avatar_x', x);
             localStorage.setItem('avatar_y', y);
@@ -88,13 +119,13 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function updateZoomDisplay(val) {
-        var el = document.getElementById('zoom-value');
+        const el = document.getElementById('zoom-value');
         if (el) el.textContent = val + '%';
     }
 
     window.previewAvatar = function (input) {
         if (input.files && input.files[0]) {
-            var controls = document.getElementById('avatar-controls');
+            const controls = document.getElementById('avatar-controls');
             if (controls) controls.style.display = 'block';
 
             localStorage.removeItem('avatar_zoom');
@@ -154,12 +185,12 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     function animatePageTitle() {
-        var h1 = document.querySelector('.page-header-left h1');
+        const h1 = document.querySelector('.page-header-left h1');
         if (!h1) return;
-        var split = SplitText.create(h1, { type: 'chars' });
+        const split = SplitText.create(h1, { type: 'chars' });
         if (!split.chars || split.chars.length < 2) return;
 
-        var animations = [
+        const animations = [
             function wave() {
                 gsap.from(split.chars, {
                     y: 40,
@@ -201,33 +232,6 @@ document.addEventListener('DOMContentLoaded', function () {
         animations[Math.floor(Math.random() * animations.length)]();
     }
 
-    function animateSidebar() {
-        if (sessionStorage.getItem('sidebar_animated')) return;
-        sessionStorage.setItem('sidebar_animated', '1');
-
-        gsap.from('.sidebar', {
-            scale: 0.98,
-            duration: 0.4,
-            ease: 'power2.out',
-            transformOrigin: 'center center'
-        });
-
-        gsap.from('.nav-item', {
-            y: -8,
-            duration: 0.3,
-            stagger: 0.04,
-            ease: 'power2.out',
-            delay: 0.15
-        });
-
-        gsap.from('.user-info', {
-            opacity: 0,
-            y: 8,
-            duration: 0.3,
-            delay: 0.3
-        });
-    }
-
     function animateStats() {
         gsap.from('.stat-card', {
             scale: 0.7,
@@ -240,7 +244,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         document.querySelectorAll('.stat-value').forEach(function (el) {
-            const target = parseInt(el.getAttribute('data-target')) || 0;
+            const target = Number.parseInt(el.getAttribute('data-target')) || 0;
             const obj = { val: 0 };
 
             gsap.to(obj, {
@@ -323,9 +327,9 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     window.toggleTasksSubmenu = function () {
-        var submenu = document.getElementById('tasks-submenu');
-        var chevron = submenu.previousElementSibling.querySelector('.chevron');
-        var isOpen = submenu.classList.contains('open');
+        const submenu = document.getElementById('tasks-submenu');
+        const chevron = submenu.previousElementSibling.querySelector('.chevron');
+        const isOpen = submenu.classList.contains('open');
 
         if (isOpen) {
             gsap.to(submenu, {

@@ -3,31 +3,35 @@ class PrettyModal {
         this.injectStyles()
     }
 
-    open(dialogId){
+    open(dialogId, event){
 
         const dialog = document.getElementById(dialogId)
         if(!dialog) return
 
-        const origin = event.currentTarget
+        const origin = event ? event.currentTarget : null
         const randomId = Math.random().toString(16).slice(2)
 
-        dialog.dataset.flipId = randomId
-        origin.dataset.flipId = randomId
+        if (origin) {
+            dialog.dataset.flipId = randomId
+            origin.dataset.flipId = randomId
+        }
 
-        const originState = Flip.getState(origin)
+        const originState = origin ? Flip.getState(origin) : null
 
         dialog.showModal()
 
-        Flip.from(originState, {
-            targets: dialog,
-            scale: true,
-            ease: CustomEase.create("custom", "M0,0 C0.305,0.206 0.116,0.567 0.3,0.8 0.394,0.921 0.491,1 1,1"),
-            toggleClass: 'pretty-modal-opening',
-            duration: 0.5,
-            onComplete: () => {
-                dialog.removeAttribute('style')
-            },
-        })
+        if (originState) {
+            Flip.from(originState, {
+                targets: dialog,
+                scale: true,
+                ease: CustomEase.create("custom", "M0,0 C0.305,0.206 0.116,0.567 0.3,0.8 0.394,0.921 0.491,1 1,1"),
+                toggleClass: 'pretty-modal-opening',
+                duration: 0.5,
+                onComplete: () => {
+                    dialog.removeAttribute('style')
+                },
+            })
+        }
 
     }
 
@@ -65,7 +69,7 @@ class PrettyModal {
             }
 
             @keyframes pretty-modal-opening{
-                from { opactiy: 0; filter: blur(8px) } to { opacity: 1; filter: blur(0px) }
+                from { opacity: 0; filter: blur(8px) } to { opacity: 1; filter: blur(0px) }
             }
 
             .pretty-modal-closing {
@@ -97,4 +101,4 @@ class PrettyModal {
     }
 }
 
-window.prettyModal = new PrettyModal();
+globalThis.prettyModal = new PrettyModal();

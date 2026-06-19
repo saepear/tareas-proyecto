@@ -30,7 +30,7 @@ class User extends Authenticatable
         ];
     }
 
-    public function setEmailAttribute($value) 
+    public function setEmailAttribute($value)
     {
         $this->attributes['email'] = strtolower(trim($value));
     }

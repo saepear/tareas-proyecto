@@ -54,10 +54,10 @@ $displayName = $user->display_name ?? ($user->first_name . ' ' . $user->last_nam
     <script>(function(){var t=localStorage.getItem('theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.classList.add('dark');})();</script>
     <link rel="stylesheet" href="{{ asset('css/theme.css') }}">
     <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/Flip.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/CustomEase.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/SplitText.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js" integrity="sha384-XmJ9SoHtVOHoQUcKvFAzVXwdkKo1Ie3bhmSoIAkcdsHGaIrVJIkmozyq0FJeb/Ly" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/Flip.min.js" integrity="sha384-LY8cG/IUULu4u3V3AhwWBt01HIuO/hlekjkqgBx0DOJ/oquEL0Qk2L6qy+1QeRZM" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/CustomEase.min.js" integrity="sha384-bk/dsRkKcZYqsQ8OzP86S+TVAAI6D7V0ApKLhj3ssXqZPNYYO77EXxOrTX+pp1g/" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/SplitText.min.js" integrity="sha384-SWJ0lLVRoipvHh59xj0pL7uC7Ih51F+5smaFtrG+2nr+TlDZU5SYJHmxfolbeNTr" crossorigin="anonymous"></script>
     <script src="{{ asset('js/theme.js') }}"></script>
     <script src="{{ asset('js/PrettyModal.js') }}" defer></script>
     <script src="{{ asset('js/dashboard.js') }}" defer></script>
@@ -83,6 +83,7 @@ $displayName = $user->display_name ?? ($user->first_name . ' ' . $user->last_nam
                     <div class="task-check">
                         <input type="checkbox" id="task-{{ $task['id'] }}" {{ $task['status'] === 'completed' ? 'checked' : '' }}>
                         <label for="task-{{ $task['id'] }}" class="task-check-label">
+                            <span class="sr-only">Completar tarea: {{ $task['title'] }}</span>
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
                                 <polyline points="20 6 9 17 4 12"/>
                             </svg>
@@ -105,13 +106,13 @@ $displayName = $user->display_name ?? ($user->first_name . ' ' . $user->last_nam
                         </div>
                     </div>
                     <div class="task-actions">
-                        <button class="task-action-btn" onclick="prettyModal.open('modal-edit-task-{{ $task['id'] }}')" title="Editar tarea">
+                        <button class="task-action-btn" onclick="prettyModal.open('modal-edit-task-{{ $task['id'] }}', event)" title="Editar tarea">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                                 <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                             </svg>
                         </button>
-                        <button class="task-action-btn danger" onclick="prettyModal.open('modal-delete-task-{{ $task['id'] }}')" title="Eliminar tarea">
+                        <button class="task-action-btn danger" onclick="prettyModal.open('modal-delete-task-{{ $task['id'] }}', event)" title="Eliminar tarea">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <polyline points="3 6 5 6 21 6"/>
                                 <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>

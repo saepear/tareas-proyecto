@@ -1,7 +1,7 @@
 (function () {
-    var chartInstances = [];
+    let chartInstances = [];
 
-    var THEME_COLORS = {
+    const THEME_COLORS = {
         light: {
             pending: '#e8b830',
             inProgress: '#4a8fe0',
@@ -18,38 +18,38 @@
         }
     };
 
-    var colorMap = {
+    const colorMap = {
         'pending': 'pending',
         'in-progress': 'inProgress',
         'completed': 'completed'
     };
 
     function getColors() {
-        var isDark = document.documentElement.classList.contains('dark');
+        const isDark = document.documentElement.classList.contains('dark');
         return isDark ? THEME_COLORS.dark : THEME_COLORS.light;
     }
 
     function assignColors(data, keys) {
-        var colors = getColors();
+        const colors = getColors();
         return data.map(function (d) {
-            var cpy = JSON.parse(JSON.stringify(d));
-            var key = colorMap[d.colorKey];
+            const cpy = structuredClone(d);
+            const key = colorMap[d.colorKey];
             cpy.color = colors[key] || colors.pending;
             return cpy;
         });
     }
 
     function assignSeriesColors(series) {
-        var colors = getColors();
+        const colors = getColors();
         return series.map(function (s) {
-            var key = colorMap[s.colorKey];
+            const key = colorMap[s.colorKey];
             s.color = colors[key] || colors.pending;
             return s;
         });
     }
 
-    window.initCharts = function (data) {
-        var colors = getColors();
+    globalThis.initCharts = function (data) {
+        const colors = getColors();
 
         chartInstances[0] = Highcharts.chart('chart-donut', {
             chart: {
@@ -156,17 +156,17 @@
         });
     };
 
-    window.updateChartTheme = function () {
+    globalThis.updateChartTheme = function () {
         chartInstances.forEach(function (chart) {
             if (chart) chart.destroy();
         });
         chartInstances = [];
-        if (window.CHART_DATA) {
-            initCharts(window.CHART_DATA);
+        if (globalThis.CHART_DATA) {
+            initCharts(globalThis.CHART_DATA);
         }
     };
 
-    if (window.CHART_DATA) {
-        initCharts(window.CHART_DATA);
+    if (globalThis.CHART_DATA) {
+        initCharts(globalThis.CHART_DATA);
     }
 })();
