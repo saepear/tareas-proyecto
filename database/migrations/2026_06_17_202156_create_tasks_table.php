@@ -17,7 +17,7 @@ public function up(): void
             $table->text('description');
             $table->foreignId('status_id')->constrained('task_states', 'id');
             $table->foreignId('priority_id')->constrained('priority_types', 'id');
-            $table->date('fecha_vencimiento');
+            $table->date('due_date');
             $table->timestamp('completion_date')->nullable();
             $table->foreignId('user_id')->constrained('users');
             $table->foreignId('created_by')->nullable()->constrained('users');

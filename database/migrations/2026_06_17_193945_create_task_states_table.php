@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('task_states', function (Blueprint $table) {
             $table->id();
-            $tabla->string('name')->unique();
+            $table->string('name')->unique();
             $table->timestamps();
             $table->softDeletes();
         });
