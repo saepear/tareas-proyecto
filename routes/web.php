@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\SettingsController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -20,5 +21,7 @@ Route::middleware('guest')->group(function () {
 // Por ahora da error debido a que no existe la vista para las tareas.
 Route::middleware('auth')->group(function() {
     Route::get('/dashboard', fn() => view('dashboard'))->name('dashboard');
+    Route::get('/tasks', fn() => view('tasks'))->name('tasks');
     Route::post('logout', [LoginController::class, 'logout'])->name('logout');
+    Route::post('/settings', [SettingsController::class, 'update'])->name('settings.update');
 });

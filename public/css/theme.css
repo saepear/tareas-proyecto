@@ -1,0 +1,42 @@
+:root {
+    --bg: #e0e5ec;
+    --shadow-dark: #c8ccd6;
+    --shadow-light: #f5f7fa;
+    --text-primary: #3d4468;
+    --text-secondary: #6c7293;
+    --text-muted: #9499b7;
+    --card-bg: #e4e9f2;
+    --border: #d0d5e0;
+    --danger: #ff3b5c;
+    --success: #00c896;
+    --warning: #e8b830;
+    --info: #4a8fe0;
+    --shadow-danger: #f0b8c4;
+    --backdrop: rgba(0, 0, 0, 0.3);
+    --btn-primary-bg: #3d4468;
+    --btn-primary-text: #e0e5ec;
+}
+
+html.dark,
+body.dark {
+    --bg: #2a2d35;
+    --shadow-dark: #1e2025;
+    --shadow-light: #353840;
+    --text-primary: #e8eaf0;
+    --text-secondary: #a8abb8;
+    --text-muted: #6e7280;
+    --card-bg: #2f323b;
+    --border: #383b44;
+    --danger: #ff6b81;
+    --success: #2ed8a0;
+    --warning: #f0c850;
+    --info: #6aafe8;
+    --shadow-danger: #3d2028;
+    --backdrop: rgba(0, 0, 0, 0.6);
+    --btn-primary-bg: #e8eaf0;
+    --btn-primary-text: #2a2d35;
+}
+
+body {
+    transition: background 0.3s ease, color 0.3s ease;
+}
