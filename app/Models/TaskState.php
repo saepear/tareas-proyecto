@@ -11,7 +11,7 @@ class TaskState extends Model
 
     protected $fillable = 
     [
-        'name'
+        'name',
     ];
 
     public function tasks()
