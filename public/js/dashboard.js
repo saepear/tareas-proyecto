@@ -354,7 +354,9 @@ document.addEventListener('DOMContentLoaded', function () {
     function preventSamePageNav() {
         document.querySelectorAll('.nav-sub-item').forEach(function (el) {
             el.addEventListener('click', function (e) {
-                if (this.getAttribute('href') === window.location.pathname + window.location.search) {
+                var linkUrl = new URL(this.href);
+                var currentUrl = window.location.pathname + window.location.search;
+                if (linkUrl.pathname + linkUrl.search === currentUrl) {
                     e.preventDefault();
                 }
             });
