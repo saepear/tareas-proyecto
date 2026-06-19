@@ -1,7 +1,4 @@
 function animateSidebar() {
-    if (sessionStorage.getItem('sidebar_animated')) return;
-    sessionStorage.setItem('sidebar_animated', '1');
-
     gsap.from('.sidebar', {
         scale: 0.98,
         duration: 0.4,
@@ -33,9 +30,33 @@ document.addEventListener('DOMContentLoaded', function () {
     animateSidebar();
     animatePageTitle();
     preventSamePageNav();
+    initChartTransitions();
+    initDelegatedCheckboxes();
 
     if (document.querySelector('.stat-card')) {
         animateStats();
+    }
+
+    function initChartTransitions() {
+        var chartCards = document.querySelectorAll('.chart-card');
+        if (!chartCards.length) return;
+
+        setTimeout(function () {
+            chartCards.forEach(function (card) {
+                card.classList.add('chart-ready');
+            });
+
+            document.querySelectorAll('.chart-empty-content').forEach(function (el) {
+                gsap.from(el, {
+                    y: 16,
+                    opacity: 0,
+                    duration: 0.5,
+                    ease: 'power2.out',
+                    delay: 0.15,
+                    clearProps: 'all'
+                });
+            });
+        }, 400);
     }
 
     function initSettings() {
@@ -310,20 +331,89 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    function setupTaskCheckboxes() {
-        document.querySelectorAll('.task-check input[type="checkbox"]').forEach(function (checkbox) {
-            checkbox.addEventListener('change', function () {
-                const card = this.closest('.task-card');
+    function initDelegatedCheckboxes() {
+        var container = document.getElementById('tasks-container');
+        if (!container) return;
 
-                gsap.to(card, {
-                    opacity: this.checked ? 0.6 : 1,
-                    duration: 0.3,
-                    ease: 'power2.out'
-                });
+        container.addEventListener('change', function (e) {
+            var checkbox = e.target.closest('.task-check input[type="checkbox"]');
+            if (!checkbox) return;
 
-                card.classList.toggle('completed', this.checked);
+            var card = checkbox.closest('.task-card');
+            var taskId = card.getAttribute('data-task-id');
+            var title = card.querySelector('.task-card-title');
+            var badge = card.querySelector('.task-status');
+            var due = card.querySelector('.task-due');
+            var isChecked = checkbox.checked;
+            var origBadgeClass = badge.className;
+            var origBadgeText = badge.textContent;
+
+            var oldStatus = card.getAttribute('data-status');
+            var priority = '';
+            var priorityEl = card.querySelector('.task-priority');
+            if (priorityEl) {
+                var classes = priorityEl.className.split(' ');
+                for (var i = 0; i < classes.length; i++) {
+                    if (classes[i].indexOf('priority-') === 0) {
+                        priority = classes[i].replace('priority-', '');
+                        break;
+                    }
+                }
+            }
+
+            gsap.to(card, {
+                opacity: isChecked ? 0.6 : 1,
+                duration: 0.3,
+                ease: 'power2.out'
             });
+
+            title.classList.toggle('completed', isChecked);
+
+            if (isChecked) {
+                badge.classList.remove('pending', 'in-progress');
+                badge.classList.add('completed');
+                badge.textContent = 'Completada';
+                if (due) due.classList.remove('overdue');
+            } else {
+                badge.classList.remove('completed');
+                badge.classList.add('pending');
+                badge.textContent = 'Pendiente';
+            }
+
+            axios.patch('/tasks/' + taskId + '/toggle')
+                .then(function (response) {
+                    var data = response.data;
+                    badge.className = 'task-status ' + data.status;
+                    badge.textContent = data.status_label;
+                    card.setAttribute('data-status', data.status);
+                    updateSidebarCounts(oldStatus, data.status, priority);
+                })
+                .catch(function () {
+                    title.classList.toggle('completed', !isChecked);
+                    gsap.to(card, { opacity: 1, duration: 0.3 });
+                    checkbox.checked = !isChecked;
+                    badge.className = origBadgeClass;
+                    badge.textContent = origBadgeText;
+                    var attemptedStatus = isChecked ? 'completed' : 'pending';
+                    updateSidebarCounts(attemptedStatus, oldStatus, priority);
+                });
         });
+    }
+
+    function updateSidebarCounts(fromStatus, toStatus, priority) {
+        if (!fromStatus || !toStatus || fromStatus === toStatus) return;
+
+        var totalEl = document.querySelector('[data-badge="total"]');
+        var fromEl = document.querySelector('[data-badge="status"][data-status="' + fromStatus + '"]');
+        var toEl = document.querySelector('[data-badge="status"][data-status="' + toStatus + '"]');
+        var fromPEl = document.querySelector('[data-badge="priority"][data-status="' + fromStatus + '"][data-priority="' + priority + '"]');
+        var toPEl = document.querySelector('[data-badge="priority"][data-status="' + toStatus + '"][data-priority="' + priority + '"]');
+
+        if (fromEl) fromEl.textContent = Math.max(0, parseInt(fromEl.textContent, 10) - 1);
+        if (toEl) toEl.textContent = parseInt(toEl.textContent, 10) + 1;
+        if (fromPEl) fromPEl.textContent = Math.max(0, parseInt(fromPEl.textContent, 10) - 1);
+        if (toPEl) toPEl.textContent = parseInt(toPEl.textContent, 10) + 1;
+        if (totalEl) totalEl.textContent = parseInt(totalEl.textContent, 10);
     }
 
     window.toggleTasksSubmenu = function () {
@@ -332,19 +422,65 @@ document.addEventListener('DOMContentLoaded', function () {
         const isOpen = submenu.classList.contains('open');
 
         if (isOpen) {
+            submenu.style.maxHeight = submenu.scrollHeight + 'px';
             gsap.to(submenu, {
                 maxHeight: 0,
                 duration: 0.3,
                 ease: 'power2.out',
                 onComplete: function () {
                     submenu.classList.remove('open');
+                    submenu.style.maxHeight = '';
                 }
             });
         } else {
             submenu.classList.add('open');
             gsap.fromTo(submenu,
                 { maxHeight: 0 },
-                { maxHeight: submenu.scrollHeight, duration: 0.3, ease: 'power2.out' }
+                {
+                    maxHeight: submenu.scrollHeight,
+                    duration: 0.3,
+                    ease: 'power2.out',
+                    onComplete: function () {
+                        submenu.style.maxHeight = '';
+                    }
+                }
+            );
+        }
+
+        if (chevron) chevron.classList.toggle('open');
+    };
+
+    window.togglePrioritySubmenu = function (el) {
+        var sub = el.nextElementSibling;
+        var chevron = el.querySelector('.chevron');
+        var parent = el.closest('.nav-sub-status');
+        var isOpen = sub.classList.contains('open');
+
+        if (isOpen) {
+            sub.style.maxHeight = sub.scrollHeight + 'px';
+            gsap.to(sub, {
+                maxHeight: 0,
+                duration: 0.2,
+                ease: 'power2.out',
+                onComplete: function () {
+                    sub.classList.remove('open');
+                    if (parent) parent.classList.remove('open');
+                    sub.style.maxHeight = '';
+                }
+            });
+        } else {
+            sub.classList.add('open');
+            if (parent) parent.classList.add('open');
+            gsap.fromTo(sub,
+                { maxHeight: 0 },
+                {
+                    maxHeight: sub.scrollHeight,
+                    duration: 0.2,
+                    ease: 'power2.out',
+                    onComplete: function () {
+                        sub.style.maxHeight = sub.scrollHeight + 'px';
+                    }
+                }
             );
         }
 
@@ -362,4 +498,28 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
     }
+
+    function initAjaxFilters() {
+        document.querySelectorAll('[data-filter="true"]').forEach(function (el) {
+            el.addEventListener('click', function (e) {
+                e.preventDefault();
+                var url = this.href;
+
+                document.querySelectorAll('.nav-sub-priority').forEach(function (l) {
+                    l.classList.remove('active');
+                });
+                this.classList.add('active');
+
+                fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                    .then(function (r) { return r.text(); })
+                    .then(function (html) {
+                        var container = document.getElementById('tasks-container');
+                        if (container) container.innerHTML = html;
+                        history.pushState({}, '', url);
+                    });
+            });
+        });
+    }
+
+    initAjaxFilters();
 });

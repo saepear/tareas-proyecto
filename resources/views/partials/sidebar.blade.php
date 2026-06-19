@@ -22,25 +22,46 @@
             </svg>
         </a>
         <div class="nav-submenu {{ request()->routeIs('tasks') ? 'open' : '' }}" id="tasks-submenu">
-            <a href="{{ route('tasks') }}" class="nav-sub-item {{ request()->routeIs('tasks') && (!request('status') || request('status') === 'all') ? 'active' : '' }}">
+            <a href="{{ route('tasks') }}" class="nav-sub-item {{ request()->routeIs('tasks') && (!request('status') || request('status') === 'all') && !request('priority') ? 'active' : '' }}">
                 <span>Todas</span>
-                <span class="nav-badge">{{ $stats['total'] }}</span>
+                <span class="nav-badge" data-badge="total">{{ $stats['total'] }}</span>
             </a>
-            <a href="{{ route('tasks', ['status' => 'pending']) }}" class="nav-sub-item {{ request()->routeIs('tasks') && request('status') === 'pending' ? 'active' : '' }}">
-                <span>Pendientes</span>
-                <span class="nav-badge">{{ $stats['pending'] }}</span>
-            </a>
-            <a href="{{ route('tasks', ['status' => 'in-progress']) }}" class="nav-sub-item {{ request()->routeIs('tasks') && request('status') === 'in-progress' ? 'active' : '' }}">
-                <span>En Progreso</span>
-                <span class="nav-badge">{{ $stats['in_progress'] }}</span>
-            </a>
-            <a href="{{ route('tasks', ['status' => 'completed']) }}" class="nav-sub-item {{ request()->routeIs('tasks') && request('status') === 'completed' ? 'active' : '' }}">
-                <span>Completadas</span>
-                <span class="nav-badge">{{ $stats['completed'] }}</span>
-            </a>
+
+            @php
+            $statuses = [
+                'pending' => 'Pendientes',
+                'in-progress' => 'En Progreso',
+                'completed' => 'Completadas',
+            ];
+            @endphp
+
+            @foreach ($statuses as $statusKey => $statusLabel)
+            @php $isOpen = request('status') === $statusKey; @endphp
+            <div class="nav-sub-status {{ $isOpen ? 'open' : '' }}">
+                <a href="#" class="nav-sub-item nav-sub-header" onclick="togglePrioritySubmenu(this); return false;">
+                    <span>{{ $statusLabel }}</span>
+                    <span class="nav-badge" data-badge="status" data-status="{{ $statusKey }}">{{ $stats[str_replace('-', '_', $statusKey)] ?? 0 }}</span>
+                    <svg class="chevron {{ $isOpen ? 'open' : '' }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"/>
+                    </svg>
+                </a>
+                <div class="nav-priority-submenu {{ $isOpen ? 'open' : '' }}">
+                    @foreach (['alta', 'media', 'baja'] as $priority)
+                    @php
+                    $count = $combinedStats[$statusKey][$priority] ?? 0;
+                    $isActive = request('status') === $statusKey && request('priority') === $priority;
+                    @endphp
+                    <a href="{{ route('tasks', ['status' => $statusKey, 'priority' => $priority]) }}" class="nav-sub-item nav-sub-priority {{ $isActive ? 'active' : '' }}" data-filter="true">
+                        <span>{{ ucfirst($priority) }}</span>
+                        <span class="nav-badge" data-badge="priority" data-status="{{ $statusKey }}" data-priority="{{ $priority }}">{{ $count }}</span>
+                    </a>
+                    @endforeach
+                </div>
+            </div>
+            @endforeach
         </div>
 
-        <a href="#" class="nav-item" onclick="prettyModal.open('modal-create-task'); return false;">
+        <a href="#" class="nav-item" style="margin-top:12px" onclick="prettyModal.open('modal-create-task', event); return false;">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <line x1="12" y1="5" x2="12" y2="19"/>
                 <line x1="5" y1="12" x2="19" y2="12"/>
@@ -64,16 +85,13 @@
                     <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
                 </svg>
             </button>
-            <form method="POST" action="{{ route('logout') }}" style="display:inline">
-                @csrf
-                <button type="submit" class="task-action-btn" title="Cerrar sesión">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                        <polyline points="16 17 21 12 16 7"/>
-                        <line x1="21" y1="12" x2="9" y2="12"/>
-                    </svg>
-                </button>
-            </form>
+            <button class="logout-btn" onclick="prettyModal.open('modal-logout', event)" title="Cerrar sesión">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                    <polyline points="16 17 21 12 16 7"/>
+                    <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+            </button>
         </div>
     </div>
 </aside>

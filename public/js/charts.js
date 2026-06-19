@@ -166,7 +166,7 @@
         }
     };
 
-    if (globalThis.CHART_DATA) {
+    if (globalThis.CHART_DATA && globalThis.CHART_DATA.donut && globalThis.CHART_DATA.donut.length > 0) {
         initCharts(globalThis.CHART_DATA);
     }
 })();

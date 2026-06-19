@@ -40,6 +40,7 @@ $statusNameToLabel = [
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/Flip.min.js" integrity="sha384-LY8cG/IUULu4u3V3AhwWBt01HIuO/hlekjkqgBx0DOJ/oquEL0Qk2L6qy+1QeRZM" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/CustomEase.min.js" integrity="sha384-bk/dsRkKcZYqsQ8OzP86S+TVAAI6D7V0ApKLhj3ssXqZPNYYO77EXxOrTX+pp1g/" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/SplitText.min.js" integrity="sha384-SWJ0lLVRoipvHh59xj0pL7uC7Ih51F+5smaFtrG+2nr+TlDZU5SYJHmxfolbeNTr" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>
     <script src="{{ asset('js/theme.js') }}"></script>
     <script src="{{ asset('js/PrettyModal.js') }}" defer></script>
     <script src="{{ asset('js/dashboard.js') }}" defer></script>
@@ -48,8 +49,8 @@ $statusNameToLabel = [
 
     <div class="dashboard-layout">
 
-        @include('partials.sidebar', ['stats' => $stats, 'user' => $user, 'displayName' => $displayName])
-
+        @include('partials.sidebar', ['stats' => $stats, 'combinedStats' => $combinedStats, 'user' => $user, 'displayName' => $displayName])
+        
         <main class="main-content">
             <div class="page-header">
                 <div class="page-header-left">
@@ -59,66 +60,13 @@ $statusNameToLabel = [
             </div>
 
             <div class="tasks-container" id="tasks-container">
-                @forelse ($filteredTasks as $task)
-                <div class="task-card" data-status="{{ $task->status->name }}" data-id="{{ $task->id }}">
-                    <div class="task-check">
-                        <input type="checkbox" id="task-{{ $task->id }}" {{ $task->status->name === 'completed' ? 'checked' : '' }}>
-                        <label for="task-{{ $task->id }}" class="task-check-label">
-                            <span class="sr-only">Completar tarea: {{ $task->title }}</span>
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                                <polyline points="20 6 9 17 4 12"/>
-                            </svg>
-                        </label>
-                    </div>
-                    <div class="task-body">
-                        <div class="task-title">{{ $task->title }}</div>
-                        @if ($task->description)
-                        <div class="task-desc">{{ $task->description }}</div>
-                        @endif
-                        <div class="task-meta">
-                            <span class="task-status {{ $task->status->name }}">{{ $statusNameToLabel[$task->status->name] ?? $task->status->name }}</span>
-                            <span class="task-due {{ \Carbon\Carbon::parse($task->due_date)->isPast() && $task->status->name !== 'completed' ? 'overdue' : '' }}">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <circle cx="12" cy="12" r="10"/>
-                                    <polyline points="12 6 12 12 16 14"/>
-                                </svg>
-                                {{ \Carbon\Carbon::parse($task->due_date)->format('d/m/Y') }}
-                            </span>
-                        </div>
-                    </div>
-                    <div class="task-actions">
-                        <button class="task-action-btn" onclick="prettyModal.open('modal-edit-task-{{ $task->id }}')" title="Editar tarea">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                            </svg>
-                        </button>
-                        <button class="task-action-btn danger" onclick="prettyModal.open('modal-delete-task-{{ $task->id }}')" title="Eliminar tarea">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <polyline points="3 6 5 6 21 6"/>
-                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-                @empty
-                <div class="empty-state">
-                    <div class="neu-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                            <polyline points="22 4 12 14.01 9 11.01"/>
-                        </svg>
-                    </div>
-                    <h3>No hay tareas aquí</h3>
-                    <p>No se encontraron tareas con este filtro.</p>
-                    <a href="{{ route('tasks') }}" class="btn-neu">Ver todas las tareas</a>
-                </div>
-                @endforelse
+                @include('partials.tasks-container')
             </div>
         </main>
     </div>
 
     @include('partials.create-task-modal')
+    @include('partials.logout-modal')
 
     {{-- Edit & Delete Modals --}}
     @foreach ($tasks as $task)

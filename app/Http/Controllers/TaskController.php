@@ -20,10 +20,17 @@ class TaskController extends Controller
             ->get();
 
         $filterStatus = $request->query('status');
+        $filterPriority = $request->query('priority');
 
-        $filteredTasks = $filterStatus && $filterStatus !== 'all'
-            ? $tasks->where('status.name', $filterStatus)
-            : $tasks;
+        $filteredTasks = $tasks;
+
+        if ($filterStatus && $filterStatus !== 'all') {
+            $filteredTasks = $filteredTasks->where('status.name', $filterStatus);
+        }
+
+        if ($filterPriority) {
+            $filteredTasks = $filteredTasks->where('priority.name', $filterPriority);
+        }
 
         $stats = [
             'total' => $tasks->count(),
@@ -31,6 +38,15 @@ class TaskController extends Controller
             'in_progress' => $tasks->filter(fn($t) => $t->status->name === 'in-progress')->count(),
             'completed' => $tasks->filter(fn($t) => $t->status->name === 'completed')->count(),
         ];
+
+        $combinedStats = [];
+        foreach (['pending', 'in-progress', 'completed'] as $st) {
+            foreach (['alta', 'media', 'baja'] as $pr) {
+                $combinedStats[$st][$pr] = $tasks
+                    ->filter(fn($t) => $t->status->name === $st && $t->priority->name === $pr)
+                    ->count();
+            }
+        }
 
         $statusLabels = TaskState::pluck('name', 'id')->map(function ($name) {
             return match ($name) {
@@ -55,10 +71,20 @@ class TaskController extends Controller
         $taskStates = TaskState::all();
         $priorityTypes = PriorityType::all();
 
+        $statusNameToLabel = [
+            'pending' => 'Pendiente',
+            'in-progress' => 'En Progreso',
+            'completed' => 'Completada',
+        ];
+
+        if ($request->ajax()) {
+            return view('partials.tasks-container', compact('filteredTasks', 'statusNameToLabel'));
+        }
+
         return view('tasks', compact(
-            'tasks', 'filteredTasks', 'stats', 'filterStatus',
+            'tasks', 'filteredTasks', 'stats', 'filterStatus', 'filterPriority',
             'statusLabels', 'currentPage', 'user', 'displayName',
-            'taskStates', 'priorityTypes'
+            'taskStates', 'priorityTypes', 'combinedStats', 'statusNameToLabel'
         ));
     }
 
@@ -122,5 +148,39 @@ class TaskController extends Controller
         $task->delete();
 
         return redirect()->route('tasks')->with('success', 'Tarea eliminada exitosamente.');
+    }
+
+    public function toggleStatus(Request $request, Task $task)
+    {
+        if ($task->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $completedState = TaskState::where('name', 'completed')->first();
+        $pendingState = TaskState::where('name', 'pending')->first();
+
+        if ($task->status_id === $completedState->id) {
+            $task->status_id = $pendingState->id;
+            $task->completion_date = null;
+        } else {
+            $task->status_id = $completedState->id;
+            $task->completion_date = now();
+        }
+
+        $task->updated_by = Auth::id();
+        $task->save();
+
+        $label = match ($task->status->name) {
+            'pending' => 'Pendiente',
+            'in-progress' => 'En Progreso',
+            'completed' => 'Completada',
+            default => $task->status->name,
+        };
+
+        return response()->json([
+            'success' => true,
+            'status' => $task->status->name,
+            'status_label' => $label,
+        ]);
     }
 }
