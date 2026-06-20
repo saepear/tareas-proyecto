@@ -216,15 +216,19 @@ html[data-nav-style="dock"] .user-avatar {
 }
 
 html[data-nav-style="dock"] .user-details,
-html[data-nav-style="dock"] .logout-btn,
 html[data-nav-style="dock"] .chevron { display: none; }
 
-html[data-nav-style="dock"] .settings-btn {
+html[data-nav-style="dock"] .settings-btn,
+html[data-nav-style="dock"] .logout-btn {
   width: 26px;
   height: 26px;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-html[data-nav-style="dock"] .settings-btn svg { width: 14px; height: 14px; }
+html[data-nav-style="dock"] .settings-btn svg,
+html[data-nav-style="dock"] .logout-btn svg { width: 14px; height: 14px; }
 
 html[data-nav-style="dock"] .main-content {
   margin-left: 0;
@@ -235,7 +239,8 @@ html[data-nav-style="dock"] .main-content {
 
 html[data-nav-style="dock"] .nav-item:hover,
 html[data-nav-style="dock"] .user-avatar:hover,
-html[data-nav-style="dock"] .settings-btn:hover {
+html[data-nav-style="dock"] .settings-btn:hover,
+html[data-nav-style="dock"] .logout-btn:hover {
   transform: scale(1.12);
 }
 
