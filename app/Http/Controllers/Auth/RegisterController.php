@@ -39,6 +39,6 @@ class RegisterController extends Controller
 
         Auth::login($user);
 
-        return redirect()->intended('dashboard');
+        return redirect()->intended('tasks')->with('success', '¡Bienvenido, ' . $user->first_name . '! Tu cuenta ha sido creada.');
     }
 }

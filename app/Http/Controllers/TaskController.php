@@ -67,8 +67,9 @@ class TaskController extends Controller
 
         $currentPage = $pageInfo[$filterStatus] ?? $pageInfo['all'];
 
-        $displayName = $user->display_name ?? ($user->first_name . ' ' . $user->last_name);
+        $displayName = $user->display_name ?: ($user->first_name . ' ' . $user->last_name);
         $taskStates = TaskState::all();
+        $editableStates = $taskStates->reject(fn($s) => $s->name === 'completed');
         $priorityTypes = PriorityType::all();
 
         $statusNameToLabel = [
@@ -84,7 +85,7 @@ class TaskController extends Controller
         return view('tasks', compact(
             'tasks', 'filteredTasks', 'stats', 'filterStatus', 'filterPriority',
             'statusLabels', 'currentPage', 'user', 'displayName',
-            'taskStates', 'priorityTypes', 'combinedStats', 'statusNameToLabel'
+            'taskStates', 'editableStates', 'priorityTypes', 'combinedStats', 'statusNameToLabel'
         ));
     }
 
@@ -97,6 +98,18 @@ class TaskController extends Controller
             'priority_id' => ['required', 'exists:priority_types,id'],
             'due_date' => ['required', 'date'],
         ]);
+
+        $duplicate = Task::where('user_id', Auth::id())
+            ->where('title', $request->title)
+            ->where('description', $request->description)
+            ->where('status_id', $request->status_id)
+            ->where('priority_id', $request->priority_id)
+            ->where('due_date', $request->due_date)
+            ->exists();
+
+        if ($duplicate) {
+            return back()->with('error', 'Ya existe una tarea idéntica con la misma configuración, prioridad y fecha límite.');
+        }
 
         $validated['user_id'] = Auth::id();
         $validated['created_by'] = Auth::id();

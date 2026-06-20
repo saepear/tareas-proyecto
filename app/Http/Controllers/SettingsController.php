@@ -14,7 +14,7 @@ class SettingsController extends Controller
         ]);
         
         $user = $request->user();
-        $user->display_name = $request->display_name;
+        $user->display_name = $request->display_name ?: null;
         $user->save();
 
         if ($request->expectsJson()) {
