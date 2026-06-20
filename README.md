@@ -85,7 +85,7 @@ TaskManager es un sistema de gestión de tareas con un diseño **neumórfico mod
 
 ---
 
-## 🛠️ Stack Tecnológico
+## Stack Tecnológico
 
 | Tecnología | Versión |
 |------------|---------|
@@ -150,7 +150,7 @@ Luego abre `http://localhost:8000` en tu navegador.
 
 ---
 
-## 🧪 Pruebas
+## Pruebas
 
 ```bash
 composer test
@@ -160,7 +160,7 @@ El proyecto incluye tests básicos con PHPUnit y una base de datos SQLite en mem
 
 ---
 
-## 📁 Estructura del Proyecto
+## Estructura del Proyecto
 
 ```
 ├── app/
@@ -206,7 +206,7 @@ El proyecto incluye tests básicos con PHPUnit y una base de datos SQLite en mem
 
 ---
 
-## 🤝 Contribuciones
+## Contribuciones
 
 Las contribuciones son bienvenidas. Si encuentras algún error o tienes una sugerencia:
 
@@ -215,7 +215,7 @@ Las contribuciones son bienvenidas. Si encuentras algún error o tienes una suge
 
 ---
 
-## 📄 Licencia
+## Licencia
 
 Este proyecto está bajo la licencia **MIT**. Consulta el archivo `LICENSE` para más detalles.
 
