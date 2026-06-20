@@ -1147,11 +1147,13 @@ dialog.neu-modal:modal::backdrop {
 }
 
 
-/* Hide scrollbar on create-task modal */
-#modal-create-task .neu-modal-content {
+/* Hide scrollbar on create-task and edit-task modals */
+#modal-create-task .neu-modal-content,
+[id^="modal-edit-task-"] .neu-modal-content {
     scrollbar-width: none;
 }
-#modal-create-task .neu-modal-content::-webkit-scrollbar {
+#modal-create-task .neu-modal-content::-webkit-scrollbar,
+[id^="modal-edit-task-"] .neu-modal-content::-webkit-scrollbar {
     display: none;
 }
 
