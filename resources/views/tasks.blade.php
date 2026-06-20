@@ -33,7 +33,8 @@ $statusNameToLabel = [
     <title>Ideas En Movimiento — Task Manager</title>
     <link rel="icon" href="{{ asset('images/logo.png') }}">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <script>(function(){var t=localStorage.getItem('theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.classList.add('dark');})();</script>
+    <script>(function(){var p=window.matchMedia('(prefers-color-scheme:dark)').matches;if(p)document.documentElement.classList.add('dark');var c=localStorage.getItem('settingsSelectedColor');if(c){var m={1:'ocean',2:'sunset',3:'forest',4:'lavender',5:'rose',6:'amber',7:'slate',8:'teal',9:'berry',10:'sky'};document.documentElement.setAttribute('data-theme',m[c]||c)}var n=localStorage.getItem('settingsSelectedNavStyle');if(n&&n!=='none')document.documentElement.setAttribute('data-nav-style',n)})();</script>
+    <style>body{background:#e0e5ec;margin:0}html.dark body{background:#2a2d35}</style>
     <link rel="stylesheet" href="{{ asset('css/theme.css') }}">
     <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js" integrity="sha384-XmJ9SoHtVOHoQUcKvFAzVXwdkKo1Ie3bhmSoIAkcdsHGaIrVJIkmozyq0FJeb/Ly" crossorigin="anonymous"></script>
@@ -41,16 +42,63 @@ $statusNameToLabel = [
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/CustomEase.min.js" integrity="sha384-bk/dsRkKcZYqsQ8OzP86S+TVAAI6D7V0ApKLhj3ssXqZPNYYO77EXxOrTX+pp1g/" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/SplitText.min.js" integrity="sha384-SWJ0lLVRoipvHh59xj0pL7uC7Ih51F+5smaFtrG+2nr+TlDZU5SYJHmxfolbeNTr" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>
+    @vite('resources/css/app.css')
     <script src="{{ asset('js/theme.js') }}"></script>
     <script src="{{ asset('js/PrettyModal.js') }}" defer></script>
+    <script src="{{ asset('js/settings-tabs.js') }}" defer></script>
     <script src="{{ asset('js/dashboard.js') }}" defer></script>
 </head>
 <body>
 
+    <div class="bg-bubbles" aria-hidden="true">
+        <div class="bubble bubble-1"></div>
+        <div class="bubble bubble-2"></div>
+        <div class="bubble bubble-3"></div>
+    </div>
+
     <div class="dashboard-layout">
 
         @include('partials.sidebar', ['stats' => $stats, 'combinedStats' => $combinedStats, 'user' => $user, 'displayName' => $displayName])
-        
+        <script>
+        (function(){
+            var raw;
+            try { raw = sessionStorage.getItem('sidebarState'); } catch(e) {}
+            if (!raw) return;
+            var state;
+            try { state = JSON.parse(raw); } catch(e) { return; }
+            sessionStorage.removeItem('sidebarState');
+            if (state.tasksOpen) {
+                var submenu = document.getElementById('tasks-submenu');
+                if (submenu) {
+                    submenu.classList.add('open');
+                    var ch = submenu.previousElementSibling.querySelector('.chevron');
+                    if (ch) ch.classList.add('open');
+                }
+            }
+            if (state.statuses) {
+                state.statuses.forEach(function(name) {
+                    var headers = document.querySelectorAll('.nav-sub-header');
+                    for (var i = 0; i < headers.length; i++) {
+                        var sp = headers[i].querySelector('span');
+                        if (sp && sp.textContent === name) {
+                            var p = headers[i].closest('.nav-sub-status');
+                            if (p) p.classList.add('open');
+                            var s = headers[i].nextElementSibling;
+                            if (s) s.classList.add('open');
+                            var c = headers[i].querySelector('.chevron');
+                            if (c) c.classList.add('open');
+                            break;
+                        }
+                    }
+                });
+            }
+            if (state.scrollTop) {
+                var sb = document.querySelector('.sidebar');
+                if (sb) sb.scrollTop = state.scrollTop;
+            }
+            window.__sidebarRestored = true;
+        })();
+        </script>
         <main class="main-content">
             <div class="page-header">
                 <div class="page-header-left">
@@ -93,9 +141,12 @@ $statusNameToLabel = [
                     <textarea id="edit-description-{{ $task->id }}" name="description">{{ $task->description }}</textarea>
                 </div>
                 <div class="form-group">
-                    <label for="edit-status_id-{{ $task->id }}">Estado</label>
+                    <label>Estado</label>
+                    @if ($task->status && $task->status->name === 'completed')
+                    <div class="completed-badge">Estado actual: <span>Completada</span></div>
+                    @endif
                     <select id="edit-status_id-{{ $task->id }}" name="status_id" required>
-                        @foreach ($taskStates as $state)
+                        @foreach ($editableStates as $state)
                         <option value="{{ $state->id }}" {{ $task->status_id === $state->id ? 'selected' : '' }}>
                             {{ $statusNameToLabel[$state->name] ?? $state->name }}
                         </option>
@@ -119,7 +170,7 @@ $statusNameToLabel = [
             </form>
             <div class="neu-modal-footer">
                 <button class="btn-neu btn-neu-sm" onclick="prettyModal.close('modal-edit-task-{{ $task->id }}')">Cancelar</button>
-                <button class="btn-neu btn-neu-sm btn-neu-primary" onclick="this.closest('.neu-modal-content').querySelector('form').submit()">Guardar Cambios</button>
+                <button class="btn-neu btn-neu-sm btn-neu-primary" onclick="var f=this.closest('.neu-modal-content').querySelector('form');if(!f.checkValidity()){if(!f.title.value)showToast('No puedes crear una tarea sin título','error');if(!f.due_date.value)showToast('La fecha no puede estar vacía','error')}else f.submit()">Guardar Cambios</button>
             </div>
         </div>
     </dialog>
@@ -149,5 +200,12 @@ $statusNameToLabel = [
     </dialog>
     @endforeach
 
+@if (session('success'))
+<script>document.addEventListener('DOMContentLoaded', function(){ showToast('{{ session('success') }}', 'success'); });</script>
+@endif
+@if (session('error'))
+<script>document.addEventListener('DOMContentLoaded', function(){ showToast('{{ session('error') }}', 'error'); });</script>
+@endif
+<div id="toast-container"></div>
 </body>
 </html>

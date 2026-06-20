@@ -1,0 +1,11 @@
+:root {
+  --font-moderna: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-tech: 'JetBrains Mono', 'Cascadia Code', 'Fira Code', monospace;
+  --font-elegante: 'Playfair Display', 'Georgia', serif;
+  --font-clasica: 'Georgia', 'Times New Roman', serif;
+}
+
+.font-moderna { font-family: var(--font-moderna); }
+.font-tech { font-family: var(--font-tech); }
+.font-elegante { font-family: var(--font-elegante); font-style: italic; }
+.font-clasica { font-family: var(--font-clasica); }

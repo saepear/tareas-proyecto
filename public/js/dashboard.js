@@ -1,4 +1,6 @@
 function animateSidebar() {
+    if (window.__sidebarRestored) return;
+
     gsap.from('.sidebar', {
         scale: 0.98,
         duration: 0.4,
@@ -22,9 +24,92 @@ function animateSidebar() {
     });
 }
 
+function saveSidebarState() {
+    var submenu = document.getElementById('tasks-submenu');
+    if (!submenu) return;
+    var state = {
+        tasksOpen: submenu.classList.contains('open'),
+        statuses: [],
+        scrollTop: document.querySelector('.sidebar')?.scrollTop || 0
+    };
+    document.querySelectorAll('.nav-sub-status.open').forEach(function (el) {
+        var label = el.querySelector('.nav-sub-header span');
+        if (label) state.statuses.push(label.textContent);
+    });
+    try { sessionStorage.setItem('sidebarState', JSON.stringify(state)); } catch (e) {}
+}
+
+window.showToast = function (message, type) {
+    if (!type) type = 'success';
+
+    var container = document.getElementById('toast-container');
+    if (!container) return;
+
+    var icons = {
+        success: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>',
+        error: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>',
+        warning: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+        info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>'
+    };
+
+    if (!icons[type]) type = 'success';
+
+    var toast = document.createElement('div');
+    toast.className = 'toast toast-' + type;
+    toast.innerHTML =
+        '<div class="toast-icon">' + icons[type] + '</div>' +
+        '<div class="toast-message">' + message + '</div>' +
+        '<button class="toast-close" aria-label="Cerrar">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
+        '</button>';
+
+    container.appendChild(toast);
+
+    var dismissTimer = setTimeout(function () {
+        dismissToast(toast);
+    }, 4000);
+    var timerPaused = false;
+
+    toast.addEventListener('mouseenter', function () {
+        timerPaused = true;
+        clearTimeout(dismissTimer);
+    });
+
+    toast.addEventListener('mouseleave', function () {
+        timerPaused = false;
+        dismissTimer = setTimeout(function () {
+            dismissToast(toast);
+        }, 4000);
+    });
+
+    toast.querySelector('.toast-close').addEventListener('click', function () {
+        clearTimeout(dismissTimer);
+        dismissToast(toast);
+    });
+
+    gsap.fromTo(toast,
+        { opacity: 0, x: 100 },
+        { opacity: 1, x: 0, duration: 0.4, ease: 'back.out(1.5)' }
+    );
+
+    function dismissToast(el) {
+        gsap.to(el, {
+            x: 80,
+            opacity: 0,
+            duration: 0.3,
+            ease: 'power2.in',
+            onComplete: function () {
+                if (el.parentNode) el.parentNode.removeChild(el);
+            }
+        });
+    }
+};
+
 document.addEventListener('DOMContentLoaded', function () {
 
     gsap.registerPlugin(Flip, CustomEase, SplitText);
+
+    window.addEventListener('beforeunload', saveSidebarState);
 
     initSettings();
     animateSidebar();
@@ -59,135 +144,119 @@ document.addEventListener('DOMContentLoaded', function () {
         }, 400);
     }
 
+    var cropperInstance = null;
+
     function initSettings() {
         initAvatar();
-        initAvatarTransform();
-        setupAvatarControls();
         initDisplayName();
+        initCropTrigger();
     }
 
     function initAvatar() {
-        const saved = localStorage.getItem('avatar');
-        const controls = document.getElementById('avatar-controls');
+        var saved = localStorage.getItem('avatar');
         if (saved) {
-            document.querySelectorAll('.user-avatar').forEach(function (el) {
+            document.querySelectorAll('.user-avatar, .settings-avatar').forEach(function (el) {
                 el.innerHTML = '<img src="' + saved + '" alt="avatar">';
             });
-            document.querySelectorAll('.avatar-preview').forEach(function (el) {
-                el.innerHTML = '<img src="' + saved + '" alt="avatar">';
-            });
-            if (controls) controls.style.display = 'block';
         }
     }
 
     function initDisplayName() {
-        const saved = localStorage.getItem('display_name');
-        if (saved) {
-            document.querySelectorAll('.user-name').forEach(function (el) {
-                el.textContent = saved;
-            });
-        }
-
-        const input = document.getElementById('settings-display-name');
-        if (input) {
-            input.value = saved || '';
-        }
+        var input = document.getElementById('settings-display-name');
+        if (!input) return;
+        var currentName = document.querySelector('.user-name');
+        input.value = currentName ? currentName.textContent.trim() : '';
     }
 
-    function initAvatarTransform() {
-        const zoom = localStorage.getItem('avatar_zoom');
-        const x = localStorage.getItem('avatar_x');
-        const y = localStorage.getItem('avatar_y');
-        if (zoom || x || y) {
-            applyAvatarTransform(zoom || 100, x || 0, y || 0);
-            if (document.getElementById('avatar-zoom')) document.getElementById('avatar-zoom').value = zoom || 100;
-            if (document.getElementById('avatar-x')) document.getElementById('avatar-x').value = x || 0;
-            if (document.getElementById('avatar-y')) document.getElementById('avatar-y').value = y || 0;
-            updateZoomDisplay(zoom || 100);
-        }
-    }
-
-    function applyAvatarTransform(zoom, x, y) {
-        const val = 'scale(' + (zoom / 100) + ') translate(' + x + 'px, ' + y + 'px)';
-        document.querySelectorAll('.user-avatar img').forEach(function (img) {
-            img.style.transform = val;
-        });
-        document.querySelectorAll('.avatar-preview img').forEach(function (img) {
-            img.style.transform = val;
+    function initCropTrigger() {
+        var trigger = document.getElementById('settings-avatar-trigger');
+        var input = document.getElementById('avatar-input');
+        if (!trigger || !input) return;
+        trigger.addEventListener('click', function () { input.click(); });
+        input.addEventListener('change', function () {
+            if (input.files && input.files[0]) openCropModal(input.files[0]);
+            input.value = '';
         });
     }
 
-    function setupAvatarControls() {
-        const zoomInput = document.getElementById('avatar-zoom');
-        const xInput = document.getElementById('avatar-x');
-        const yInput = document.getElementById('avatar-y');
-        if (!zoomInput) return;
+    function openCropModal(file) {
+        var modal = document.getElementById('avatar-pretty-modal');
+        if (!modal) return;
 
-        function update() {
-            const z = Number.parseInt(zoomInput.value, 10);
-            const x = Number.parseInt(xInput.value, 10);
-            const y = Number.parseInt(yInput.value, 10);
-            localStorage.setItem('avatar_zoom', z);
-            localStorage.setItem('avatar_x', x);
-            localStorage.setItem('avatar_y', y);
-            applyAvatarTransform(z, x, y);
-            updateZoomDisplay(z);
-        }
+        modal.style.display = 'flex';
 
-        zoomInput.addEventListener('input', update);
-        xInput.addEventListener('input', update);
-        yInput.addEventListener('input', update);
-    }
+        var panel = modal.querySelector('.pretty-panel');
+        gsap.set(panel, { opacity: 0, scale: 0.2 });
+        gsap.to(panel, { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(1.7)' });
 
-    function updateZoomDisplay(val) {
-        const el = document.getElementById('zoom-value');
-        if (el) el.textContent = val + '%';
-    }
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            var img = document.getElementById('crop-image');
+            img.src = e.target.result;
 
-    window.previewAvatar = function (input) {
-        if (input.files && input.files[0]) {
-            const controls = document.getElementById('avatar-controls');
-            if (controls) controls.style.display = 'block';
-
-            localStorage.removeItem('avatar_zoom');
-            localStorage.removeItem('avatar_x');
-            localStorage.removeItem('avatar_y');
-            if (document.getElementById('avatar-zoom')) document.getElementById('avatar-zoom').value = 100;
-            if (document.getElementById('avatar-x')) document.getElementById('avatar-x').value = 0;
-            if (document.getElementById('avatar-y')) document.getElementById('avatar-y').value = 0;
-            updateZoomDisplay(100);
-            applyAvatarTransform(100, 0, 0);
-
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                const dataUrl = e.target.result;
-                localStorage.setItem('avatar', dataUrl);
-                document.querySelectorAll('.user-avatar').forEach(function (el) {
-                    el.innerHTML = '<img src="' + dataUrl + '" alt="avatar">';
+            img.onload = function () {
+                if (cropperInstance) cropperInstance.destroy();
+                cropperInstance = new Cropper(img, {
+                    viewMode: 1,
+                    dragMode: 'move',
+                    aspectRatio: 1,
+                    autoCropArea: 1,
+                    cropBoxMovable: false,
+                    cropBoxResizable: false,
+                    background: false,
+                    modal: false,
+                    guides: false,
+                    center: false,
+                    highlight: false,
                 });
-                document.querySelectorAll('.avatar-preview img').forEach(function (img) {
-                    img.src = dataUrl;
-                });
-                document.querySelectorAll('.avatar-preview').forEach(function (el) {
-                    el.innerHTML = '<img src="' + dataUrl + '" alt="avatar">';
-                });
-                applyAvatarTransform(100, 0, 0);
+
+                img.addEventListener('wheel', function (e) {
+                    e.preventDefault();
+                    if (!cropperInstance) return;
+                    var delta = e.deltaY > 0 ? -0.05 : 0.05;
+                    cropperInstance.zoom(delta);
+                }, { passive: false });
             };
-            reader.readAsDataURL(input.files[0]);
-        }
+        };
+        reader.readAsDataURL(file);
+    }
+
+    window.closeCropModal = function () {
+        var modal = document.getElementById('avatar-pretty-modal');
+        if (!modal) return;
+        var panel = modal.querySelector('.pretty-panel');
+        gsap.to(panel, {
+            opacity: 0, scale: 0.85, duration: 0.25, ease: 'power2.in',
+            onComplete: function () {
+                modal.style.display = 'none';
+                if (cropperInstance) { cropperInstance.destroy(); cropperInstance = null; }
+            }
+        });
+    };
+
+    window.applyCrop = function () {
+        if (!cropperInstance) return;
+        var canvas = cropperInstance.getCroppedCanvas({ width: 256, height: 256 });
+        var dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+        localStorage.setItem('avatar', dataUrl);
+        document.querySelectorAll('.user-avatar, .settings-avatar').forEach(function (el) {
+            el.innerHTML = '<img src="' + dataUrl + '" alt="avatar">';
+        });
+        closeCropModal();
+    };
+
+    var settingsDirty = false;
+    var settingsInitialName = '';
+    var settingsInputTracked = false;
+
+    window.markSettingsDirty = function () {
+        settingsDirty = true;
     };
 
     window.saveSettings = function () {
-        const displayName = document.getElementById('settings-display-name').value.trim();
+        var displayName = document.getElementById('settings-display-name').value.trim();
+        var token = document.querySelector('meta[name="csrf-token"]');
 
-        if (displayName) {
-            localStorage.setItem('display_name', displayName);
-            document.querySelectorAll('.user-name').forEach(function (el) {
-                el.textContent = displayName;
-            });
-        }
-
-        const token = document.querySelector('meta[name="csrf-token"]');
         fetch('/settings', {
             method: 'POST',
             headers: {
@@ -197,13 +266,169 @@ document.addEventListener('DOMContentLoaded', function () {
             body: JSON.stringify({ display_name: displayName })
         })
         .then(function (r) { return r.json(); })
-        .then(function (data) {
-            prettyModal.close('modal-settings');
+        .then(function () {
+            document.querySelectorAll('.user-name').forEach(function (el) {
+                el.textContent = displayName || el.textContent;
+            });
+            settingsDirty = false;
+            closeSettingsModal();
         })
         .catch(function () {
-            prettyModal.close('modal-settings');
+            settingsDirty = false;
+            closeSettingsModal();
         });
     };
+
+    var settingsModalOpen = false;
+
+    window.toggleSettingsModal = function () {
+        if (settingsModalOpen) {
+            closeSettingsModal(true);
+        } else {
+            openSettingsModal();
+        }
+    };
+
+    function trackSettingsDirty() {
+        var input = document.getElementById('settings-display-name');
+        if (!input) return;
+        settingsInitialName = input.value;
+        settingsPreviousTheme = document.documentElement.classList.contains('dark');
+        settingsDirty = false;
+        if (!settingsInputTracked) {
+            input.addEventListener('input', function () {
+                settingsDirty = this.value !== settingsInitialName;
+            });
+            settingsInputTracked = true;
+        }
+    }
+
+    function openSettingsModal() {
+        if (settingsModalOpen) return;
+        var modal = document.getElementById('settings-pretty-modal');
+        var card = document.getElementById('settings-card');
+        var backdrop = document.getElementById('settings-backdrop');
+        if (!modal || !card) return;
+
+        settingsModalOpen = true;
+        modal.style.display = 'flex';
+        trackSettingsDirty();
+        if (typeof snapshotSettings === 'function') snapshotSettings();
+
+        gsap.set(backdrop, { opacity: 0 });
+        gsap.set(card, { opacity: 0, scale: 0.4, y: 60 });
+
+        gsap.to(backdrop, { opacity: 1, duration: 0.35, ease: 'power2.out' });
+
+        gsap.to(card, {
+            opacity: 1,
+            scale: 1,
+            y: 0,
+            duration: 0.5,
+            ease: 'back.out(1.7)',
+            onComplete: function () {
+                if (typeof initSettingsTabs === 'function') {
+                    initSettingsTabs();
+                }
+            }
+        });
+    }
+
+    function dismissUnsavedToast() {
+        var toast = document.getElementById('unsaved-toast');
+        if (!toast) return;
+        gsap.to(toast, {
+            y: 20, opacity: 0, duration: 0.3, ease: 'power2.in',
+            onComplete: function () { toast.remove(); }
+        });
+    }
+
+    window.discardSettingsChanges = function () {
+        dismissUnsavedToast();
+        closeSettingsModal(true);
+    };
+
+    function showUnsavedToast() {
+        var existing = document.getElementById('unsaved-toast');
+        if (existing) existing.remove();
+
+        var toast = document.createElement('div');
+        toast.id = 'unsaved-toast';
+        toast.className = 'unsaved-toast';
+        toast.innerHTML =
+            '<div class="unsaved-toast-content">' +
+                '<span class="unsaved-toast-icon">!</span>' +
+                '<span class="unsaved-toast-text">Tienes cambios sin guardar</span>' +
+                '<button class="unsaved-toast-discard" onclick="discardSettingsChanges()">Descartar</button>' +
+            '</div>';
+
+        document.body.appendChild(toast);
+
+        gsap.fromTo(toast,
+            { y: 30, opacity: 0 },
+            { y: 0, opacity: 1, duration: 0.35, ease: 'power2.out' }
+        );
+
+        if (window.unsavedToastTimeout) clearTimeout(window.unsavedToastTimeout);
+        window.unsavedToastTimeout = setTimeout(function () {
+            dismissUnsavedToast();
+        }, 4000);
+    }
+
+    window.closeSettingsModal = function (revert) {
+        if (!settingsModalOpen) return;
+
+        if (settingsDirty && !revert) {
+            showUnsavedToast();
+            return;
+        }
+
+        if (revert && settingsDirty) {
+            var input = document.getElementById('settings-display-name');
+            if (input) input.value = settingsInitialName;
+            if (typeof revertSettings === 'function') revertSettings();
+            settingsDirty = false;
+        }
+
+        var modal = document.getElementById('settings-pretty-modal');
+        var card = document.getElementById('settings-card');
+        var backdrop = document.getElementById('settings-backdrop');
+        if (!modal || !card) return;
+
+        settingsModalOpen = false;
+
+        gsap.to(card, {
+            opacity: 0,
+            scale: 0.85,
+            y: 40,
+            duration: 0.25,
+            ease: 'power2.in',
+            onComplete: function () {
+                modal.style.display = 'none';
+            }
+        });
+
+        gsap.to(backdrop, {
+            opacity: 0,
+            duration: 0.25,
+            ease: 'power2.in'
+        });
+    };
+
+    document.addEventListener('click', function (e) {
+        var modal = document.getElementById('settings-pretty-modal');
+        if (!modal || modal.style.display === 'none') return;
+        var card = document.getElementById('settings-card');
+        if (card && !card.contains(e.target) && !e.target.closest('.settings-btn')) {
+            closeSettingsModal();
+        }
+    });
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && settingsModalOpen) {
+            closeSettingsModal();
+        }
+    });
 
     function animatePageTitle() {
         const h1 = document.querySelector('.page-header-left h1');
@@ -341,7 +566,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
             var card = checkbox.closest('.task-card');
             var taskId = card.getAttribute('data-task-id');
-            var title = card.querySelector('.task-card-title');
             var badge = card.querySelector('.task-status');
             var due = card.querySelector('.task-due');
             var isChecked = checkbox.checked;
@@ -361,13 +585,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             }
 
-            gsap.to(card, {
-                opacity: isChecked ? 0.6 : 1,
-                duration: 0.3,
-                ease: 'power2.out'
-            });
-
-            title.classList.toggle('completed', isChecked);
+            card.classList.toggle('completed', isChecked);
 
             if (isChecked) {
                 badge.classList.remove('pending', 'in-progress');
@@ -389,8 +607,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     updateSidebarCounts(oldStatus, data.status, priority);
                 })
                 .catch(function () {
-                    title.classList.toggle('completed', !isChecked);
-                    gsap.to(card, { opacity: 1, duration: 0.3 });
+                    card.classList.toggle('completed', !isChecked);
                     checkbox.checked = !isChecked;
                     badge.className = origBadgeClass;
                     badge.textContent = origBadgeText;
@@ -420,35 +637,67 @@ document.addEventListener('DOMContentLoaded', function () {
         const submenu = document.getElementById('tasks-submenu');
         const chevron = submenu.previousElementSibling.querySelector('.chevron');
         const isOpen = submenu.classList.contains('open');
+        const isDock = document.documentElement.getAttribute('data-nav-style') === 'dock';
 
-        if (isOpen) {
-            submenu.style.maxHeight = submenu.scrollHeight + 'px';
-            gsap.to(submenu, {
-                maxHeight: 0,
-                duration: 0.3,
-                ease: 'power2.out',
-                onComplete: function () {
-                    submenu.classList.remove('open');
-                    submenu.style.maxHeight = '';
-                }
-            });
-        } else {
-            submenu.classList.add('open');
-            gsap.fromTo(submenu,
-                { maxHeight: 0 },
-                {
-                    maxHeight: submenu.scrollHeight,
-                    duration: 0.3,
-                    ease: 'power2.out',
+        if (isDock) {
+            if (isOpen) {
+                gsap.to(submenu, {
+                    scale: 0.85, opacity: 0,
+                    duration: 0.2, ease: 'power2.in',
                     onComplete: function () {
+                        submenu.classList.remove('open');
+                        submenu.style.transform = '';
+                        submenu.style.opacity = '';
+                    }
+                });
+            } else {
+                gsap.set(submenu, { scale: 0.85, opacity: 0 });
+                submenu.classList.add('open');
+                gsap.to(submenu, {
+                    scale: 1, opacity: 1,
+                    duration: 0.35, ease: 'back.out(1.7)',
+                    onComplete: function () {
+                        submenu.style.transform = '';
+                        submenu.style.opacity = '';
+                    }
+                });
+            }
+        } else {
+            if (isOpen) {
+                submenu.style.maxHeight = submenu.scrollHeight + 'px';
+                gsap.to(submenu, {
+                    maxHeight: 0, duration: 0.3, ease: 'power2.out',
+                    onComplete: function () {
+                        submenu.classList.remove('open');
                         submenu.style.maxHeight = '';
                     }
-                }
-            );
+                });
+            } else {
+                submenu.classList.add('open');
+                gsap.fromTo(submenu,
+                    { maxHeight: 0 },
+                    {
+                        maxHeight: submenu.scrollHeight, duration: 0.3, ease: 'power2.out',
+                        onComplete: function () {
+                            submenu.style.maxHeight = '';
+                        }
+                    }
+                );
+            }
         }
 
         if (chevron) chevron.classList.toggle('open');
     };
+
+    document.addEventListener('click', function (e) {
+        var sub = document.getElementById('tasks-submenu');
+        if (!sub || !sub.classList.contains('open')) return;
+        var ns = document.documentElement.getAttribute('data-nav-style');
+        if (ns !== 'dock') return;
+        if (sub.contains(e.target)) return;
+        if (e.target.closest('.nav-item-group')) return;
+        window.toggleTasksSubmenu();
+    });
 
     window.togglePrioritySubmenu = function (el) {
         var sub = el.nextElementSibling;
@@ -497,15 +746,25 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             });
         });
+        document.querySelector('.nav-item-dashboard').addEventListener('click', function (e) {
+            if (window.location.pathname === '/dashboard' || window.location.pathname === '/dashboard/') {
+                e.preventDefault();
+            }
+        });
     }
+
+
 
     function initAjaxFilters() {
         document.querySelectorAll('[data-filter="true"]').forEach(function (el) {
             el.addEventListener('click', function (e) {
-                e.preventDefault();
                 var url = this.href;
+                var container = document.getElementById('tasks-container');
+                if (!container) return;
 
-                document.querySelectorAll('.nav-sub-priority').forEach(function (l) {
+                e.preventDefault();
+
+                document.querySelectorAll('[data-filter="true"]').forEach(function (l) {
                     l.classList.remove('active');
                 });
                 this.classList.add('active');
@@ -513,8 +772,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
                     .then(function (r) { return r.text(); })
                     .then(function (html) {
-                        var container = document.getElementById('tasks-container');
-                        if (container) container.innerHTML = html;
+                        container.innerHTML = html;
                         history.pushState({}, '', url);
                     });
             });

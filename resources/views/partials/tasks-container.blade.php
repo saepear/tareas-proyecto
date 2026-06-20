@@ -1,5 +1,5 @@
 @forelse ($filteredTasks as $task)
-<div class="task-card" data-status="{{ $task->status->name }}" data-id="{{ $task->id }}" data-task-id="{{ $task->id }}">
+<div class="task-card{{ $task->status->name === 'completed' ? ' completed' : '' }}" data-status="{{ $task->status->name }}" data-id="{{ $task->id }}" data-task-id="{{ $task->id }}">
     <div class="task-card-content">
         <div class="task-card-top">
             <div class="task-check">
@@ -11,7 +11,7 @@
                     </svg>
                 </label>
             </div>
-            <div class="task-card-title {{ $task->status->name === 'completed' ? 'completed' : '' }}">{{ $task->title }}</div>
+            <div class="task-card-title">{{ $task->title }}</div>
         </div>
         @if ($task->description)
         <div class="task-card-desc">{{ $task->description }}</div>

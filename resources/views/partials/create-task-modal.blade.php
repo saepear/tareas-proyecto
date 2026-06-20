@@ -22,7 +22,7 @@
             <div class="form-group">
                 <label for="create-status_id">Estado</label>
                 <select id="create-status_id" name="status_id" required>
-                    @foreach ($taskStates as $state)
+                    @foreach ($editableStates as $state)
                     <option value="{{ $state->id }}" {{ $state->name === 'pending' ? 'selected' : '' }}>
                         {{ $statusNameToLabel[$state->name] ?? $state->name }}
                     </option>
@@ -46,7 +46,7 @@
         </form>
         <div class="neu-modal-footer">
             <button class="btn-neu btn-neu-sm" onclick="prettyModal.close('modal-create-task')">Cancelar</button>
-            <button class="btn-neu btn-neu-sm btn-neu-primary" onclick="this.closest('.neu-modal-content').querySelector('form').submit()">Crear Tarea</button>
+            <button class="btn-neu btn-neu-sm btn-neu-primary" onclick="var f=this.closest('.neu-modal-content').querySelector('form');if(!f.checkValidity()){if(!f.title.value)showToast('No puedes crear una tarea sin título','error');if(!f.due_date.value)showToast('La fecha no puede estar vacía','error')}else f.submit()">Crear Tarea</button>
         </div>
     </div>
 </dialog>

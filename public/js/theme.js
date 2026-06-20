@@ -1,69 +1,31 @@
+var _lightColors = {1:'#4a8fe0',2:'#e8b830',3:'#00c896',4:'#9b6bff',5:'#ff6b81',6:'#ff9f43',7:'#6c7293',8:'#2ed8a0',9:'#e84393',10:'#54a0ff'};
+var _darkColors  = {1:'#6aafe8',2:'#f0c850',3:'#2ed8a0',4:'#b084ff',5:'#ff6b81',6:'#ffb347',7:'#a8abb8',8:'#4ae0b0',9:'#f06292',10:'#74b9ff'};
+
+function applyBubbleColor(idx) {
+    var isDark = document.documentElement.classList.contains('dark');
+    var color = (isDark ? _darkColors : _lightColors)[idx] || '#4a8fe0';
+    document.querySelectorAll('.bubble').forEach(function(b) { b.style.background = color; });
+}
+
 function initTheme() {
-    var saved = localStorage.getItem('theme');
-    var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    if (saved === 'dark' || (!saved && prefersDark)) {
+    var p = window.matchMedia('(prefers-color-scheme:dark)').matches;
+    if (p) {
         document.documentElement.classList.add('dark');
         if (document.body) document.body.classList.add('dark');
     }
-    updateThemeIcons();
-}
-
-function updateThemeIcons() {
-    var isDark = document.documentElement.classList.contains('dark');
-    document.querySelectorAll('.theme-option').forEach(function (opt) {
-        var mode = opt.getAttribute('data-mode');
-        if (mode === (isDark ? 'dark' : 'light')) {
-            opt.classList.add('active');
-        } else {
-            opt.classList.remove('active');
-        }
-    });
-}
-
-window.toggleTheme = function (mode) {
-    var isDark = mode === 'dark';
-    document.documentElement.classList.toggle('dark', isDark);
-    document.body.classList.toggle('dark', isDark);
-    localStorage.setItem('theme', isDark ? 'dark' : 'light');
-
-    var toggleBtn = event && event.currentTarget;
-
-    if (typeof gsap !== 'undefined') {
-        var x = toggleBtn
-            ? toggleBtn.getBoundingClientRect().left + toggleBtn.offsetWidth / 2
-            : window.innerWidth / 2;
-        var y = toggleBtn
-            ? toggleBtn.getBoundingClientRect().top + toggleBtn.offsetHeight / 2
-            : window.innerHeight / 2;
-
-        var overlay = document.createElement('div');
-        overlay.className = 'theme-overlay';
-        document.body.appendChild(overlay);
-
-        gsap.fromTo(overlay,
-            { clipPath: 'circle(0% at ' + x + 'px ' + y + 'px)' },
-            {
-                clipPath: 'circle(150% at ' + x + 'px ' + y + 'px)',
-                duration: 0.8,
-                ease: 'power4.inOut',
-                onComplete: function () {
-                    overlay.remove();
-                }
-            }
-        );
-
-        var mainContent = document.querySelector('.main-content');
-        if (mainContent) {
-            gsap.fromTo(mainContent,
-                { filter: 'blur(4px)', scale: 0.98 },
-                { filter: 'blur(0px)', scale: 1, duration: 0.5, ease: 'power2.out', delay: 0.3 }
-            );
-        }
+    var c = localStorage.getItem('settingsSelectedColor');
+    if (c) {
+        var m = {1:'ocean',2:'sunset',3:'forest',4:'lavender',5:'rose',6:'amber',7:'slate',8:'teal',9:'berry',10:'sky'};
+        var n = m[c] || c;
+        document.documentElement.setAttribute('data-theme', n);
+        if (document.body) document.body.classList.add('theme-' + n);
+        applyBubbleColor(c);
     }
-
-    updateThemeIcons();
-
-    if (typeof updateChartTheme === 'function') {
-        updateChartTheme();
+    var ns = localStorage.getItem('settingsSelectedNavStyle');
+    if (ns && ns !== 'none') document.documentElement.setAttribute('data-nav-style', ns);
+    var font = localStorage.getItem('settingsSelectedFont');
+    if (font) {
+        var fonts = { moderna:'Inter, -apple-system, BlinkMacSystemFont, sans-serif', tech:'JetBrains Mono, Cascadia Code, Fira Code, monospace', elegante:'Playfair Display, Georgia, serif', clasica:'Georgia, Times New Roman, serif' };
+        if (fonts[font] && document.body) document.body.style.fontFamily = fonts[font];
     }
-};
+}

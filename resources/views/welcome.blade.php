@@ -5,9 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Task Manager — Organiza tu trabajo</title>
     <link rel="icon" href="{{ asset('images/logo.png') }}">
-    <script>(function(){var t=localStorage.getItem('theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.classList.add('dark');})();</script>
+    <script>(function(){var p=window.matchMedia('(prefers-color-scheme:dark)').matches;if(p)document.documentElement.classList.add('dark');var c=localStorage.getItem('settingsSelectedColor');if(c){var m={1:'ocean',2:'sunset',3:'forest',4:'lavender',5:'rose',6:'amber',7:'slate',8:'teal',9:'berry',10:'sky'};document.documentElement.setAttribute('data-theme',m[c]||c)}var n=localStorage.getItem('settingsSelectedNavStyle');if(n&&n!=='none')document.documentElement.setAttribute('data-nav-style',n);})();</script>
+    <style>body{background:#e0e5ec;margin:0}html.dark body{background:#1c1e28}</style>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ asset('css/theme.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/custom-themes.css') }}">
     <link rel="stylesheet" href="{{ asset('css/login.css') }}">
     <style>
         body {
@@ -295,7 +297,10 @@
             font-size: 0.95rem;
         }
 
-        .theme-nav-btn {
+        .palette-wrapper {
+            position: relative;
+        }
+        .palette-trigger {
             width: 38px;
             height: 38px;
             border-radius: 10px;
@@ -309,12 +314,49 @@
             box-shadow: 3px 3px 8px var(--shadow-dark), -3px -3px 8px var(--shadow-light);
             transition: all 0.3s ease;
         }
-        .theme-nav-btn:hover {
+        .palette-trigger:hover {
             color: var(--text-primary);
             box-shadow: 5px 5px 12px var(--shadow-dark), -5px -5px 12px var(--shadow-light);
         }
-        .theme-nav-btn:active {
-            box-shadow: inset 2px 2px 5px var(--shadow-dark), inset -2px -2px 5px var(--shadow-light);
+        .palette-dropdown {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            padding: 12px;
+            background: var(--bg);
+            border-radius: 16px;
+            box-shadow: 8px 8px 24px var(--shadow-dark), -8px -8px 24px var(--shadow-light);
+            z-index: 1000;
+            max-width: 196px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-4px);
+            transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+        }
+        .palette-dropdown.open {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        .palette-dropdown .palette-dot {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+        .palette-dropdown .palette-dot:hover {
+            transform: scale(1.25);
+            z-index: 2;
+        }
+        .palette-dropdown .palette-dot.active {
+            border-color: var(--text-primary);
+            border-radius: 8px;
+            transform: scale(1.15);
         }
 
         @media (max-width: 768px) {
@@ -348,17 +390,26 @@
             TaskManager
         </div>
         <div class="auth-links">
-            <button class="theme-nav-btn" onclick="toggleTheme(document.body.classList.contains('dark') ? 'light' : 'dark')">
-                <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px">
-                    <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
-                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-                    <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
-                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-                </svg>
-                <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;display:none">
-                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-                </svg>
-            </button>
+            <div class="palette-wrapper">
+                <button class="palette-trigger" id="paletteTrigger" aria-label="Seleccionar paleta de colores">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px">
+                        <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="23"/><line x1="1" y1="12" x2="23" y2="12"/>
+                        <path d="M5.64 18.36a9 9 0 1 0 12.72-12.72"/>
+                    </svg>
+                </button>
+                <div class="palette-dropdown" id="paletteDropdown">
+                    <button class="palette-dot" data-idx="1" style="background:var(--palette-1)" aria-label="Océano"></button>
+                    <button class="palette-dot" data-idx="2" style="background:var(--palette-2)" aria-label="Atardecer"></button>
+                    <button class="palette-dot" data-idx="3" style="background:var(--palette-3)" aria-label="Bosque"></button>
+                    <button class="palette-dot" data-idx="4" style="background:var(--palette-4)" aria-label="Lavanda"></button>
+                    <button class="palette-dot" data-idx="5" style="background:var(--palette-5)" aria-label="Rosa"></button>
+                    <button class="palette-dot" data-idx="6" style="background:var(--palette-6)" aria-label="Ámbar"></button>
+                    <button class="palette-dot" data-idx="7" style="background:var(--palette-7)" aria-label="Pizarra"></button>
+                    <button class="palette-dot" data-idx="8" style="background:var(--palette-8)" aria-label="Verde Agua"></button>
+                    <button class="palette-dot" data-idx="9" style="background:var(--palette-9)" aria-label="Baya"></button>
+                    <button class="palette-dot" data-idx="10" style="background:var(--palette-10)" aria-label="Cielo"></button>
+                </div>
+            </div>
             <a href="{{ route('login') }}" class="nav-login">Iniciar Sesión</a>
             <a href="{{ route('register') }}" class="btn-register-nav">Comenzar Gratis</a>
         </div>
@@ -420,8 +471,61 @@
         </div>
     </section>
 
+    <!-- Ambient glow blobs -->
+    <div class="bg-bubbles">
+        <div class="bubble bubble-1"></div>
+        <div class="bubble bubble-2"></div>
+        <div class="bubble bubble-3"></div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js" integrity="sha384-XmJ9SoHtVOHoQUcKvFAzVXwdkKo1Ie3bhmSoIAkcdsHGaIrVJIkmozyq0FJeb/Ly" crossorigin="anonymous"></script>
     <script src="{{ asset('js/theme.js') }}"></script>
-    <script>initTheme();</script>
+    <script>
+        (function() {
+            var lightColors = {1:'#4a8fe0',2:'#e8b830',3:'#00c896',4:'#9b6bff',5:'#ff6b81',6:'#ff9f43',7:'#6c7293',8:'#2ed8a0',9:'#e84393',10:'#54a0ff'};
+            var darkColors  = {1:'#6aafe8',2:'#f0c850',3:'#2ed8a0',4:'#b084ff',5:'#ff6b81',6:'#ffb347',7:'#a8abb8',8:'#4ae0b0',9:'#f06292',10:'#74b9ff'};
+            var map = {1:'ocean',2:'sunset',3:'forest',4:'lavender',5:'rose',6:'amber',7:'slate',8:'teal',9:'berry',10:'sky'};
+
+            function applyBubbleColor(idx) {
+                var isDark = document.documentElement.classList.contains('dark');
+                var color = (isDark ? darkColors : lightColors)[idx] || '#4a8fe0';
+                document.querySelectorAll('.bubble').forEach(function(b) { b.style.background = color; });
+            }
+
+            var current = localStorage.getItem('settingsSelectedColor');
+            var trigger = document.getElementById('paletteTrigger');
+            var dropdown = document.getElementById('paletteDropdown');
+
+            if (current) applyBubbleColor(current);
+
+            function selectPalette(idx) {
+                localStorage.setItem('settingsSelectedColor', idx);
+                document.documentElement.setAttribute('data-theme', map[idx] || idx);
+                applyBubbleColor(idx);
+                dropdown.querySelectorAll('.palette-dot').forEach(function(d) { d.classList.remove('active'); });
+                var active = dropdown.querySelector('.palette-dot[data-idx="' + idx + '"]');
+                if (active) active.classList.add('active');
+                dropdown.classList.remove('open');
+            }
+
+            dropdown.querySelectorAll('.palette-dot').forEach(function(dot) {
+                if (dot.dataset.idx === current) dot.classList.add('active');
+                dot.addEventListener('click', function() { selectPalette(this.dataset.idx); });
+            });
+
+            if (trigger) {
+                trigger.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    dropdown.classList.toggle('open');
+                });
+            }
+
+            document.addEventListener('click', function(e) {
+                if (dropdown && dropdown.classList.contains('open') && !dropdown.contains(e.target) && e.target !== trigger) {
+                    dropdown.classList.remove('open');
+                }
+            });
+        })();
+    </script>
 </body>
 </html>

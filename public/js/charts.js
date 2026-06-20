@@ -57,9 +57,11 @@
                 backgroundColor: 'transparent'
             },
             title: { text: null },
+            accessibility: { enabled: false },
             credits: { enabled: false },
             tooltip: {
-                pointFormat: '<b>{point.y}</b> tareas ({point.percentage:.1f}%)'
+                pointFormat: '<b>{point.y}</b> tareas ({point.percentage:.1f}%)',
+                hideDelay: 0
             },
             plotOptions: {
                 pie: {
@@ -82,15 +84,46 @@
             }]
         });
 
+        var dayOrder = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        var dayLabels = { 'Sun': 'Dom', 'Mon': 'Lun', 'Tue': 'Mar', 'Wed': 'Mié', 'Thu': 'Jue', 'Fri': 'Vie', 'Sat': 'Sáb' };
+        var statusKeys = ['pending', 'in-progress', 'completed'];
+        var statusMap = { 'pending': 'Pendientes', 'in-progress': 'En Progreso', 'completed': 'Completadas' };
+
+        var weeklyCounts = {};
+        dayOrder.forEach(function (d) { weeklyCounts[d] = { 'pending': 0, 'in-progress': 0, 'completed': 0 }; });
+
+        data.weeklyRaw.forEach(function (t) {
+            var d = new Date(t.created_at);
+            var dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            var day = dayNames[d.getDay()];
+            if (weeklyCounts[day]) {
+                weeklyCounts[day][t.status]++;
+            }
+        });
+
+        var weeklyCategories = [];
+        var weeklySeries = [
+            { name: 'Pendientes', data: [], colorKey: 'pending' },
+            { name: 'En Progreso', data: [], colorKey: 'in-progress' },
+            { name: 'Completadas', data: [], colorKey: 'completed' }
+        ];
+        dayOrder.forEach(function (d) {
+            weeklyCategories.push(dayLabels[d]);
+            weeklySeries[0].data.push(weeklyCounts[d]['pending']);
+            weeklySeries[1].data.push(weeklyCounts[d]['in-progress']);
+            weeklySeries[2].data.push(weeklyCounts[d]['completed']);
+        });
+
         chartInstances[1] = Highcharts.chart('chart-weekly', {
             chart: {
                 type: 'column',
                 backgroundColor: 'transparent'
             },
             title: { text: null },
+            accessibility: { enabled: false },
             credits: { enabled: false },
             xAxis: {
-                categories: data.weekly.categories,
+                categories: weeklyCategories,
                 labels: { style: { color: colors.text } },
                 lineColor: colors.gridLine,
                 tickColor: colors.gridLine
@@ -107,7 +140,8 @@
             },
             tooltip: {
                 headerFormat: '<b>{point.key}</b><br/>',
-                pointFormat: '{series.name}: <b>{point.y}</b> tareas'
+                pointFormat: '{series.name}: <b>{point.y}</b> tareas',
+                hideDelay: 0
             },
             plotOptions: {
                 column: {
@@ -115,7 +149,7 @@
                     borderWidth: 0
                 }
             },
-            series: assignSeriesColors(data.weekly.series)
+            series: assignSeriesColors(weeklySeries)
         });
 
         chartInstances[2] = Highcharts.chart('chart-monthly', {
@@ -124,6 +158,7 @@
                 backgroundColor: 'transparent'
             },
             title: { text: null },
+            accessibility: { enabled: false },
             credits: { enabled: false },
             xAxis: {
                 categories: data.monthly.categories,
@@ -144,7 +179,8 @@
             },
             tooltip: {
                 headerFormat: '<b>{point.key}</b><br/>',
-                pointFormat: '{series.name}: <b>{point.y}</b> tareas'
+                pointFormat: '{series.name}: <b>{point.y}</b> tareas',
+                hideDelay: 0
             },
             plotOptions: {
                 bar: {
