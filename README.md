@@ -15,11 +15,11 @@
 
 ---
 
-## 📋 Descripción
+## Descripción
 
 TaskManager es un sistema de gestión de tareas con un diseño **neumórfico moderno**, desarrollado como primer proyecto completo con Laravel. Cuenta con un panel de control con gráficos estadísticos, CRUD completo de tareas, 10 temas de color, 4 estilos de navegación, modo oscuro automático y animaciones fluidas con GSAP.
 
-> **Nota:** Este es mi primer proyecto completo, por lo que es posible que encuentres algunos detalles visuales o de funcionamiento. Si encuentras algún error, no dudes en reportarlo.
+> **Nota:** Este es nuestro primer proyecto completo, por lo que es posible que encuentres algunos detalles visuales o de funcionamiento. Si encuentras algún error, no dudes en reportarlo.
 
 ---
 
