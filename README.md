@@ -23,7 +23,7 @@ TaskManager es un sistema de gestión de tareas con un diseño **neumórfico mod
 
 ---
 
-## ✨ Características
+## Características
 
 ### Gestión de Tareas
 - CRUD completo (Crear, Leer, Actualizar, Eliminar)
@@ -63,21 +63,25 @@ TaskManager es un sistema de gestión de tareas con un diseño **neumórfico mod
 
 ---
 
-## 📸 Capturas de Pantalla
+## Capturas de Pantalla
 
-> Las siguientes capturas serán agregadas próximamente. Si deseas contribuir con imágenes, siéntete libre de hacer un PR.
+### Landing
+![Landing](public/images/landing.png)
 
-| Vista | Descripción |
-|-------|-------------|
-| `[Screenshot: Dashboard]` | Panel principal con gráficos y estadísticas |
-| `[Screenshot: Tasks]` | Vista de tareas con filtros y tarjetas |
-| `[Screenshot: Create Task Modal]` | Modal de creación de tareas |
-| `[Screenshot: Edit Task Modal]` | Modal de edición de tareas |
-| `[Screenshot: Settings Modal]` | Modal de ajustes con temas, nav-styles y fuentes |
-| `[Screenshot: Dock Style]` | Barra de navegación flotante (estilo Dock) |
-| `[Screenshot: Login]` | Página de inicio de sesión |
-| `[Screenshot: Register]` | Página de registro |
-| `[Screenshot: Landing]` | Página de aterrizaje |
+### Login
+![Login](public/images/login.png)
+
+### Dashboard — Vista Superior
+![Dashboard 1](public/images/dashboard1.png)
+
+### Dashboard — Vista Inferior
+![Dashboard 2](public/images/dashboard2.png)
+
+### Tareas
+![Tasks](public/images/tasks.png)
+
+### Ajustes
+![Settings](public/images/settings.png)
 
 ---
 
